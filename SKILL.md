@@ -1,6 +1,6 @@
 ---
 name: build-web-app
-description: Technology-agnostic, documentation-driven workflow for building any web application (or other software project) with an AI coding assistant, from initial idea through production release. Covers project classification, discovery, requirements, architecture, module/slice decomposition, the per-slice implement-verify-document-commit loop, context/memory management across sessions, anti-hallucination discipline, recovery from stuck implementations, release readiness, and frontend experience design (design discovery, workflow-first screens, bento grids and other layout systems, smooth animation and low-bandwidth performance, UI verification). Use when starting a new app/project, planning or architecting a system, deciding what to build next, implementing or verifying a development slice, designing or building UI screens/layouts/animations, writing project documentation (PRD, architecture doc, roadmap, ADRs, design system doc), or preparing for a production deployment.
+description: Technology-agnostic, documentation-driven workflow for building any web application (or other software project) with an AI coding assistant, from initial idea through production release. Covers project classification, discovery, requirements, architecture, module/slice decomposition, the per-slice implement-verify-document-commit loop, context/memory management across sessions, anti-hallucination discipline, recovery from stuck implementations, release readiness, frontend experience design (design discovery, workflow-first screens, bento grids and other layout systems, smooth animation and low-bandwidth performance, UI verification), and system design & data-structure selection (access-pattern-first engineering — matching indexes, caches, queues, bloom filters, sorted sets, and fan-out/caching/rate-limiting patterns to the question the code asks, calibrated to project grade). Use when starting a new app/project, planning or architecting a system, deciding what to build next, implementing or verifying a development slice, designing or building UI screens/layouts/animations, choosing how a feature stores/queries/caches data, diagnosing a slow query or page, scaling a feature, writing project documentation (PRD, architecture doc, roadmap, ADRs, design system doc), or preparing for a production deployment.
 ---
 
 # Build Web App — AI-First Development Workflow
@@ -15,8 +15,8 @@ Core idea: **documentation is not an end-of-project artifact — it's the mechan
 long, multi-session AI-assisted work possible.** The repo itself should let a session with zero
 memory of prior conversations pick up exactly where the last one left off.
 
-This skill is a navigator over four detailed reference books. Read this file first, then load
-only the reference file(s) the current moment actually needs — loading all four for a small
+This skill is a navigator over five detailed reference books. Read this file first, then load
+only the reference file(s) the current moment actually needs — loading all five for a small
 task defeats the point of the workflow's own context-management principle.
 
 | Reference | Load it when… |
@@ -24,6 +24,7 @@ task defeats the point of the workflow's own context-management principle.
 | `references/methodology.md` (Book 1, Phases 0–6, 12, 14, 16) | Starting a new project, running discovery, writing planning docs (PRD/Architecture/Modules/Slices/Roadmap), reviewing architecture, deciding what's next, resolving a plan-vs-reality conflict, or closing out the project. |
 | `references/coding-standards.md` (Book 2, Phases 7–11, 13, 15) | Implementing, verifying, documenting, or committing one specific slice — the file loaded on essentially every working session once planning is done. |
 | `references/frontend-design.md` (Book 4, extends Phases 1, 3, 9) | Anything UI: running design discovery, choosing a layout system (bento grid or otherwise), extracting a reference site the user likes, designing a screen or admin workflow (quick-add, bulk-add), adding animation, or verifying a UI slice. Skip it for pure backend/schema slices. |
+| `references/system-design.md` (Book 5, extends Phases 2–4, 8, 9) | Designing how any feature stores, queries, or caches data; writing the Architecture Document's Data & Access Patterns section; choosing an index/cache/queue/search/rate-limit/feed strategy; reviewing scalability in Phase 4; a query, count, or page is slow; or a new infrastructure component (cache, queue, search engine) is being proposed. |
 | `references/templates.md` (Book 3) | Creating one of the standard project documents for the first time (`NEXT_SESSION.md`, per-slice note, module Feature Summary, ADR, Decision Log, Risk Register, Release Checklist, Repository Standards, Design System doc, Definition of Ready, Project Bootstrap Checklist). |
 
 ## The full lifecycle
@@ -47,7 +48,8 @@ Bootstrap → Classify → Discovery → Requirements → Planning Docs → Arch
 - **Picking up an existing project this session for the first time**: read `NEXT_SESSION.md` in the target repo (if it exists) — it names the exact narrow reading order for the next slice. If no such file exists yet, read `methodology.md` Phase 12's cold-start reading order.
 - **About to write code for a specific slice**: go straight to `coding-standards.md` Phase 8 (Definition of Ready, then the implementation sequence). If the slice has a UI surface, also load `frontend-design.md`.
 - **About to design any screen, layout, or animation — or the user mentioned a style (bento grid, a reference site) or the UI feels generic/janky**: `frontend-design.md`, starting from its Design Discovery section. The visual direction is asked for and recorded in `docs/DESIGN.md`, never defaulted.
-- **A slice just got implemented**: `coding-standards.md` Phases 9–11 (verify, document, commit).
+- **Deciding how a feature stores/queries data, planning the architecture's data layer, or something is slow (a query, a count, a page)**: `references/system-design.md` — run its five-question access-pattern interview, pick from the problem-shape tables, and respect its grade dial (an index solves most of it; exotic structures need a measurement first).
+- **A slice just got implemented**: `coding-standards.md` Phases 9–11 (verify, document, commit). If it touched storage, also run `references/system-design.md`'s verification step (seeded volume + query plan against the performance budget).
 - **Something in the plan doesn't match reality, or implementation is stuck**: `methodology.md` Phase 14 (plan-vs-reality conflicts) and `coding-standards.md` Phase 15 (recovery procedure).
 - **Preparing to ship**: `methodology.md` Phase 16 plus `templates.md`'s Final Quality Audit (PRD traceability, whole-codebase bug/security/naming/dead-code audit) and Release Readiness Checklist, in that order.
 
@@ -61,6 +63,7 @@ Bootstrap → Classify → Discovery → Requirements → Planning Docs → Arch
 - **A slice must be Ready before it starts, and Done only once it's actually verified** — both gates matter; skipping the entry gate is how implementation starts on missing information.
 - **When verification keeps failing, stop and re-read the architecture/module docs before trying another fix** — repeated failure is information about the plan, not just an obstacle to brute-force past.
 - **Classify the project's grade (Phase 0) before discovery starts** — a prototype, an internal tool, and a system holding real payment/health data need genuinely different rigor, even with similar feature lists.
+- **Match the structure to the question — never brute-force what an index can answer.** The cost of answering a question should depend on the size of the answer, not the size of the data (Instagram doesn't scan its user table to say "wrong password" — one indexed lookup, one hash compare). Every hot query names its backing structure in the Architecture Document's Data & Access Patterns section (`references/system-design.md`); and the inverse holds too: no cache, queue, or search engine joins the stack without a measurement proving the plain database failed.
 - **Never default the visual design.** The design direction is the user's decision, made in design discovery (`frontend-design.md`) from real options — bento grid, editorial, dense console, or a reference site inspected and measured in a real browser — and recorded in `docs/DESIGN.md`. Screens are designed around the user's task (quick-add, bulk-add, one task per screen), animations follow the transform/opacity rule, and UI slices are verified at multiple viewports on a throttled network.
 
 The full Golden Rules list (shared by Books 1 and 2) is in `references/methodology.md`, bottom section.

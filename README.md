@@ -24,7 +24,7 @@ The core idea: **documentation is not an end-of-project artifact — it's the me
 
 ## What's inside
 
-A navigator (`SKILL.md`) over four reference books. The AI loads **only** the book the current moment needs — that's the workflow's own context-management principle applied to itself.
+A navigator (`SKILL.md`) over five reference books. The AI loads **only** the book the current moment needs — that's the workflow's own context-management principle applied to itself.
 
 | File | Book | Covers |
 |---|---|---|
@@ -33,6 +33,7 @@ A navigator (`SKILL.md`) over four reference books. The AI loads **only** the bo
 | `references/coding-standards.md` | Book 2 | Per-slice implementation discipline: Ready/Done gates, migrations, config, integrations, concurrency, feature flags, verification, testing strategy, documentation updates, git workflow, anti-hallucination rules, recovery procedure, module-close hygiene |
 | `references/frontend-design.md` | Book 4 | Design discovery (the visual direction is *asked*, never defaulted), reference-site extraction with real measurements, workflow-first screens (quick-add, bulk-add, one task per screen), bento grids and other layout systems, smooth animation & low-bandwidth performance, UI verification |
 | `references/templates.md` | Book 3 | Copy-pasteable templates for every document the workflow uses |
+| `references/system-design.md` | Book 5 | Access-pattern-first system design & data-structure selection: the five-question access-pattern interview, problem-shape → structure tables (indexes, bloom filters, sorted sets, tries, HyperLogLog, queues…), workload → pattern tables (caching, fan-out, outbox, sharded counters, rate limiting), a grade dial that forbids over-engineering, a measurement-backed research protocol, and grep-able red flags (`LIKE '%…%'`, `OFFSET` pagination, per-request `COUNT(*)`, N+1) |
 
 ---
 
@@ -64,7 +65,7 @@ That's it. Claude Code discovers the skill automatically. It activates when you 
 
 ### Any other AI assistant
 
-Copy the four markdown files into your project (e.g. `docs/workflow/`) and instruct the assistant, at the start of every session, to read `SKILL.md` first and follow its navigation rules.
+Copy the six markdown files into your project (e.g. `docs/workflow/`) and instruct the assistant, at the start of every session, to read `SKILL.md` first and follow its navigation rules.
 
 ---
 
@@ -207,13 +208,14 @@ Tell the skill you have an existing codebase. It will run discovery against the 
 - It **discloses** work outside a slice's scope instead of silently doing (or skipping) it.
 - It **refuses to call a slice done** until it ran the real app and watched the feature work.
 - It **stops and re-reads** when verification keeps failing, instead of brute-forcing.
+- It **matches data structures and system design to access patterns** — an indexed lookup instead of a scan, a counter instead of a per-request `COUNT(*)`, a bloom filter or cache only when a measurement earns it — the way large systems answer "wrong password" without searching the whole database.
 - It keeps the codebase clean as it goes: search-before-create (no duplicate helpers), a hygiene pass at every module close, and a final audit that traces every PRD requirement to a verified feature.
 
 ---
 
 ## Contributing
 
-Issues and PRs welcome. The bar for additions: it must prevent a *recurring, named failure mode* of AI-assisted development — not add ceremony. Keep the four-book structure and the phase numbering intact.
+Issues and PRs welcome. The bar for additions: it must prevent a *recurring, named failure mode* of AI-assisted development — not add ceremony. Keep the five-book structure and the phase numbering intact.
 
 ## License
 

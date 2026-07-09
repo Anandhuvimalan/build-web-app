@@ -121,7 +121,7 @@ Produce the following as durable, versioned documents (not chat history):
 | Document | Answers |
 |---|---|
 | **Product Requirements Document (PRD)** | What are we building and why? What's explicitly out of scope? |
-| **Architecture Document** | How is it built? What are the non-negotiable technical constraints? |
+| **Architecture Document** | How is it built? What are the non-negotiable technical constraints? Includes a **Data & Access Patterns** section (see `references/system-design.md`): per core entity, expected volume at launch and 10x, the hottest questions the code asks of it, and the data structure / index / cache each one is backed by. |
 | **Module Breakdown** | What are the independent units of the system, and how do they depend on each other? |
 | **Development Slices** | What is the smallest independently-shippable unit of work, module by module? |
 | **Roadmap** | What order do slices get built in, and what's the critical path to a usable release? |
@@ -143,8 +143,8 @@ No implementation begins before these exist and are approved by whoever owns the
 
 Before writing the first line of implementation code, stress-test the architecture document itself against:
 
-- **Scalability** — does this hold up at 10x the expected initial load?
-- **Security** — where is the actual trust boundary, and does every mutation re-check it?
+- **Scalability** — does this hold up at 10x the expected initial load? Walk the Data & Access Patterns section (`references/system-design.md`): every hot question must name a backing structure whose cost doesn't grow with total data size.
+- **Security** — where is the actual trust boundary, and does every mutation re-check it? Does the boundary reject abuse in cheap-first order (rate limit → validate → authenticate → authorize)?
 - **Performance** — what's the expected hot path, and is it designed for that?
 - **Maintainability** — can a new session understand this subsystem from its own documentation alone?
 - **Simplicity** — is there a simpler design that meets the same requirements? (Prefer it. Cleverness is a cost, not a feature.)
