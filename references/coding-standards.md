@@ -1,8 +1,8 @@
 # Book 2 — AI Coding Standards
 
-Part of a three-book set. Start at `SKILL.md` if you haven't already. This book covers day-to-day operational discipline: how a slice actually gets implemented, verified, documented, committed, and recovered when something goes wrong. For the big-picture arc (discovery, planning, architecture, modules, context management), see `methodology.md`. For copy-pasteable document templates, see `templates.md`.
+Part of a four-book set. Start at `SKILL.md` if you haven't already. This book covers day-to-day operational discipline: how a slice actually gets implemented, verified, documented, committed, and recovered when something goes wrong. For the big-picture arc (discovery, planning, architecture, modules, context management), see `methodology.md`. For frontend experience and design (design discovery, layout systems, motion, UI verification), see `frontend-design.md`. For copy-pasteable document templates, see `templates.md`.
 
-**Phase numbers are shared across all three books, not restarted per book** — this book covers Phases 7–11, 13, and 15, plus the (unnumbered) Project Bootstrap Checklist. The gaps (0–6, 12, 14, 16) live in `methodology.md`.
+**Phase numbers are shared across all books, not restarted per book** — this book covers Phases 7–11, 13, and 15, plus the (unnumbered) Project Bootstrap Checklist. The gaps (0–6, 12, 14, 16) live in `methodology.md`; `frontend-design.md` extends Phases 1, 3, and 9 for UI work.
 
 This book is the one loaded most often, once per development slice, for the entire life of the project.
 
@@ -43,7 +43,7 @@ If using role-specialized agents (or just role-specialized *thinking*, even solo
 
 - Frontend, Backend, Database/DAL, API, Testing, Security, Performance, SEO, Documentation, Review
 
-For each: what files it may touch, what files it must never touch, what it reads before starting, what it hands off when done. This turns "review every mutation for security" from a scavenger hunt into "read one folder."
+For each: what files it may touch, what files it must never touch, what it reads before starting, what it hands off when done. This turns "review every mutation for security" from a scavenger hunt into "read one folder." The Frontend role's reading list always includes `docs/DESIGN.md` and `frontend-design.md` (Book 4).
 
 **Load only the roles the current slice actually needs.** A schema-only slice doesn't need the frontend role's context; a pure-UI slice doesn't need the database role's. This is a context-management technique, not just an organizational one — every role document loaded is tokens spent before real work starts.
 
@@ -64,6 +64,7 @@ Phase 9 (below) defines when a slice is *done*. A slice shouldn't start until it
 - Its Performance Checklist delta is written, even if "N/A beyond standard"
 - The files it's expected to touch are identified
 - The agent role(s) or context (Phase 7) it needs are identified
+- If the slice has a UI surface: `docs/DESIGN.md` exists and covers this screen's layout system and tokens, and the slice's spec names its empty/loading/error/populated states (see `frontend-design.md`) — a UI slice designed only in its populated state is not Ready
 
 If any of these is missing, resolve it before writing code — treat "let's just start and figure it out" as a warning sign, not a time-saver.
 
@@ -102,6 +103,7 @@ A slice is not complete until all of the following pass — and passing means ac
 - Unit tests (including the slice's own *named* test cases specifically, not just "tests exist")
 - Integration tests, where the slice's behavior spans a real boundary (a real database, a real HTTP call)
 - End-to-end verification for anything with a runtime surface — actually start the app and drive the feature, in a real browser or real CLI invocation, not just through mocks. **This step catches classes of bugs the other steps structurally cannot**: a database that was never migrated, a test isolation leak that pollutes real dev state, an assumption about framework behavior that was subtly wrong, a form validation bug that only manifests with real input shapes (an unchecked checkbox, a null vs. undefined value). Treat "I ran it and watched it work" as a distinct, non-optional verification step, not a nice-to-have.
+- For slices with a UI surface, the end-to-end step expands to the **UI verification checklist in `frontend-design.md`**: multiple viewports, all four content states (empty/loading/error/populated), a throttled-network and throttled-CPU pass, zero layout shift, the transform/opacity animation rule, `prefers-reduced-motion`, keyboard-only operation, contrast/touch targets, draft protection on long forms, and conformance to `docs/DESIGN.md` tokens.
 - Security review against the slice's Security Checklist
 - Performance review against the slice's Performance Checklist
 - Code review for correctness, reuse, and scope discipline — a pass distinct from the security/performance passes, ideally done by inspecting the diff as if you didn't write it

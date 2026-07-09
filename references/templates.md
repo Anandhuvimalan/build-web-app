@@ -1,6 +1,6 @@
 # Book 3 — Reference Templates
 
-Part of a three-book set. Start at `SKILL.md` if you haven't already. This book is copy-pasteable templates for every document the other two books reference. For the big-picture methodology (discovery, planning, architecture, context management), see `methodology.md`. For day-to-day implementation discipline (how a slice gets built, verified, committed), see `coding-standards.md`.
+Part of a four-book set. Start at `SKILL.md` if you haven't already. This book is copy-pasteable templates for every document the other books reference. For the big-picture methodology (discovery, planning, architecture, context management), see `methodology.md`. For day-to-day implementation discipline (how a slice gets built, verified, committed), see `coding-standards.md`. For frontend experience and design, see `frontend-design.md`.
 
 This is the book to load when actually creating one of these files for the first time in a project — otherwise it's reference material, not something to read start to finish.
 
@@ -229,6 +229,53 @@ each time.
 ## Git
 - Commit message format: <e.g. "<SLICE-ID>: summary" + body explaining why>
 - Branch naming: <convention, if used>
+```
+
+---
+
+## Design System (`docs/DESIGN.md`)
+
+Referenced throughout `frontend-design.md` (Book 4) and produced in Phase 3 for any project with a UI. Set once in design discovery, revised rarely, only with explicit sign-off — every UI slice follows it without re-deciding it.
+
+```markdown
+# Design System
+
+The approved design direction. UI slices follow this without re-deciding it;
+per-slice style inventions are source-of-truth drift (see frontend-design.md).
+
+## Direction
+- Chosen direction: <bento grid / editorial / dense console / minimal / reference-derived>
+- Chosen by: <who>, on <date> — from options offered in design discovery, not defaulted
+- Reference site(s), if any: <URL> — measured in a real browser on <date>, values below
+- Users of this UI: <who, how often, skill level>
+- Device/network floor: <e.g. mid-range Android on 3G — this is a design input>
+
+## Layout system
+- Container max-width: <px>
+- Grid: <columns> columns, <px> gutter, <px> outer margins
+- Column math: (container − (columns−1)×gutter) / columns = <px> per column
+- Breakpoints: <list> — and the re-flow decision at each (what the composition
+  becomes, and the deliberate stack order on mobile)
+
+## Tokens
+- Spacing scale: <base unit and steps, e.g. 4 / 8 / 16 / 24 / 32 / 48 / 64>
+- Type scale: <display / heading / body / caption — size, weight, line-height>
+- Color roles: <background layers, surface, text hierarchy, accents — as roles>
+- Radii: <values, and where each applies>
+- Motion tokens: <2–3 duration+easing pairs, e.g. micro 150ms ease-out;
+  entrance 250ms ease-out> — and the standing rules: transform/opacity only,
+  prefers-reduced-motion respected
+- Animation library: <CSS only / Framer Motion / GSAP> — per the Decision Log
+  entry of <date>; lazy-loaded, never in the first-paint path
+
+## Workflow patterns in force
+- Quick-add on reference dropdowns: <where it applies>
+- Bulk add: <which entry screens offer it, and via what (inline table / CSV)>
+- Page-hops budget: <each core task and the max screens it may take>
+- Draft protection: <which forms, via what mechanism>
+
+## Screens designed (running list)
+- <screen> — <one line: its task, its layout, link to slice notes>
 ```
 
 ---

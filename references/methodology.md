@@ -1,8 +1,8 @@
 # Book 1 — AI Development Methodology
 
-Part of a three-book set. Start at `SKILL.md` if you haven't already — it explains what's in each book and when to load which. This book covers the big-picture arc: understanding the business, planning the system, decomposing it, and closing the loop at release. For day-to-day implementation discipline (how a slice actually gets built, verified, committed), see `coding-standards.md`. For copy-pasteable document templates, see `templates.md`.
+Part of a four-book set. Start at `SKILL.md` if you haven't already — it explains what's in each book and when to load which. This book covers the big-picture arc: understanding the business, planning the system, decomposing it, and closing the loop at release. For day-to-day implementation discipline (how a slice actually gets built, verified, committed), see `coding-standards.md`. For frontend experience and design (design discovery, layout systems, motion, UI verification), see `frontend-design.md`. For copy-pasteable document templates, see `templates.md`.
 
-**Phase numbers are shared across all three books, not restarted per book** — this book covers Phases 0–6, 12, 14, and 16. The gaps (7–11, 13, 15) live in `coding-standards.md`.
+**Phase numbers are shared across all books, not restarted per book** — this book covers Phases 0–6, 12, 14, and 16. The gaps (7–11, 13, 15) live in `coding-standards.md`; `frontend-design.md` extends Phases 1, 3, and 9 for UI work rather than adding new phases.
 
 ---
 
@@ -71,6 +71,10 @@ If the person you're building for doesn't know an answer yet, record it as an op
 
 **Anti-pattern:** inferring a business rule from what "most apps like this do." If it wasn't stated, ask. **Anti-pattern:** treating a single pass through the question list as discovery. The loop only ends at the playback-and-confirm step above.
 
+### Design discovery runs inside this loop
+
+If the project has any user-facing surface, design discovery is part of this same Phase 1 loop, not a later styling pass: who operates the UI and how often, what visual direction they want (offered as real options — bento grid, editorial, dense console, minimal, or a reference site they admire — never defaulted), brand constraints, and the realistic device/network floor. If they name a reference site, inspect it in a real browser and extract concrete measurements rather than guessing at it. The full question list, the reference-extraction procedure, and the workflow-first screen principles live in `frontend-design.md`; the answers land in `docs/DESIGN.md` (Phase 3).
+
 ### Establishing the quality and security bar
 
 This is the question people most often skip, and the one with the largest downstream cost when skipped: **what grade of software is this, actually?** A prototype, an internal MVP, and a system that will hold real customer payment data, health records, or financial transactions have almost nothing in common architecturally, even if their feature lists look similar. Ask this explicitly, early, and don't infer it from the domain — a "simple internal tool" can still carry serious compliance obligations, and a consumer app can be genuinely low-stakes.
@@ -124,6 +128,7 @@ Produce the following as durable, versioned documents (not chat history):
 | **AI Development Rules** | What conventions and guardrails apply to every session, regardless of which slice? |
 | **Implementation Workflow** | What exact stage sequence does every slice go through? |
 | **Repository Standards** (`docs/REPOSITORY_STANDARDS.md`, see `coding-standards.md`) | What does correctly-styled code in this repo look like — naming, import ordering, folder/file conventions, error-message style, logging style, comments policy, commit message format? |
+| **Design System** (`docs/DESIGN.md`, see `frontend-design.md`) — only if the project has a UI | What is the chosen visual direction and why? What are the layout system, tokens (spacing, type, color roles, radii, motion), per-breakpoint behavior, and workflow patterns (quick-add, bulk-add) every UI slice follows without re-deciding them? |
 
 These become **the project's single source of truth**. Once approved, no other document — and no chat conversation — should silently contradict them. If a downstream document needs to diverge from the PRD, the PRD is updated first, with a note explaining why, not quietly worked around.
 
@@ -200,6 +205,7 @@ This is the phase that makes a project survivable across dozens of separate AI s
 | `docs/RISKS.md` | Open technical/business uncertainties not yet resolved | Only when a meaningful risk surfaces; entries closed out (not deleted) once resolved |
 | `docs/RELEASE_CHECKLIST.md` | The final gate before a production deployment, separate from feature completeness | Checked immediately before each release (see Phase 16) |
 | `docs/REPOSITORY_STANDARDS.md` | Naming, style, and convention rules every session follows without re-deciding them | Set early; revised rarely, only with explicit sign-off |
+| `docs/DESIGN.md` (UI projects only, see `frontend-design.md`) | The approved design direction, tokens, layout system, and workflow patterns every UI slice follows | Set in Phase 3; revised rarely, only with explicit sign-off |
 | `PROJECT_BOOTSTRAP.md` | One-time repo setup checklist (CI, hooks, templates, security policy) | Once, at repo creation; not part of the ongoing per-slice cycle |
 
 All templates for these files are in `templates.md`.
@@ -282,5 +288,6 @@ Execute the production deployment only once both gates pass, then verify the spe
 - A slice must be Ready before it's implemented, not just Done when it's finished — the entry gate matters as much as the exit gate.
 - When verification keeps failing, stop and re-read before trying another fix — repeated failure is information, not an obstacle to push through.
 - Not every decision needs an ADR, but every decision worth re-litigating needs to be written down somewhere.
+- Never default the visual design — the direction is asked for in design discovery, recorded in `docs/DESIGN.md`, and followed by every UI slice; screens are designed around the user's task, not the data model.
 
-This list is shared by all three books — `coding-standards.md` links back here rather than repeating it.
+This list is shared by all four books — the other books link back here rather than repeating it.
