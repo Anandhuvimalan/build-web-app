@@ -136,26 +136,26 @@ Copy the four markdown files into your project (e.g. `docs/workflow/`) and instr
 
 ```mermaid
 flowchart TD
-    A[Bootstrap repo\nCI, linters, hooks] --> B[Ph.0 Classify\nprototype / internal / production / regulated]
-    B --> C[Ph.1 Discovery loop\nbusiness + security bar + design discovery]
-    C --> D[Ph.2 Requirements\neverything testable]
-    D --> E[Ph.3 Planning docs\nPRD · Architecture · Modules · Slices · Roadmap\nDesign System · Conventions · Baselines]
-    E --> F[Ph.4 Architecture review]
-    F --> G[Ph.5 Modules\ndependency graph]
-    G --> H[Ph.6 Slices\nsized by risk]
-    H --> I[Ready check]
-    I --> J[Plan + approval]
-    J --> K[Implement ONE slice]
-    K --> L[Verify: lint, types, tests,\nRUN THE REAL THING]
-    L --> M[Document + commit]
-    M --> N[Update NEXT_SESSION.md]
+    A["Bootstrap repo<br/>CI, linters, hooks"] --> B["Ph.0 Classify<br/>prototype / internal / production / regulated"]
+    B --> C["Ph.1 Discovery loop<br/>business + security bar + design discovery"]
+    C --> D["Ph.2 Requirements<br/>everything testable"]
+    D --> E["Ph.3 Planning docs<br/>PRD · Architecture · Modules · Slices · Roadmap<br/>Design System · Conventions · Baselines"]
+    E --> F["Ph.4 Architecture review"]
+    F --> G["Ph.5 Modules<br/>dependency graph"]
+    G --> H["Ph.6 Slices<br/>sized by risk"]
+    H --> I["Ready check"]
+    I --> J["Plan + approval"]
+    J --> K["Implement ONE slice"]
+    K --> L["Verify: lint, types, tests,<br/>RUN THE REAL THING"]
+    L --> M["Document + commit"]
+    M --> N["Update NEXT_SESSION.md"]
     N -->|next slice| I
-    L -->|keeps failing| R[STOP — re-read docs,\nresolve, record decision]
+    L -->|keeps failing| R["STOP — re-read docs,<br/>resolve, record decision"]
     R --> I
-    M -->|module's last slice| O[Feature Summary +\nhygiene pass: dead code,\nduplicates, naming]
+    M -->|module's last slice| O["Feature Summary +<br/>hygiene pass: dead code,<br/>duplicates, naming"]
     O --> N
-    N -->|all modules done| P[Ph.16 Final Quality Audit\nPRD traceability · regression ·\nsecurity · naming · dead code]
-    P --> Q[Release Readiness Checklist\nthen deploy + verify in production]
+    N -->|all modules done| P["Ph.16 Final Quality Audit<br/>PRD traceability · regression ·<br/>security · naming · dead code"]
+    P --> Q["Release Readiness Checklist<br/>then deploy + verify in production"]
 ```
 
 ### What makes a session resumable (the memory system)
