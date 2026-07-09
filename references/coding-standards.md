@@ -24,6 +24,7 @@ Maintain it as `PROJECT_BOOTSTRAP.md` (or fold it into a README section) and wor
 □ Configure editor settings (e.g. .editorconfig)
 □ Configure commit hooks (e.g. pre-commit lint/format/test gates)
 □ Configure CI (build, lint, type-check, test on every push/PR)
+□ Configure dead-code & unused-dependency detection (e.g. knip/ts-prune/depcheck for JS/TS, vulture for Python — whatever fits the stack), run in the module-close hygiene pass (Phase 10)
 □ Configure issue templates
 □ Configure pull request template
 □ Configure automated dependency updates (Dependabot/Renovate or equivalent)
@@ -77,9 +78,10 @@ Every implementation session, for every slice, follows this sequence:
 3. **Cross-check dependencies** — confirm the slice's stated dependencies are already built, or explicitly stub them.
 4. **Explain the implementation plan** — including any necessary-but-unlisted infrastructure the slice will actually need (a test runner that doesn't exist yet, a route group that doesn't exist yet, a DAL file the architecture implies but the slice's own file list omits). Disclose these, don't silently add them and don't silently skip them.
 5. **Wait for approval** before writing code, unless the person you're working with has explicitly authorized moving faster for this session.
-6. **Implement only that slice.** Touch only the files its scope actually requires, plus whatever was disclosed in step 4.
-7. **Follow the architecture strictly.** If implementation reveals the architecture doc is wrong or silent on something, stop and flag it — don't quietly patch around it and don't quietly patch the architecture doc either, unless you have standing authorization to do so.
-8. **Avoid unrelated changes.** A formatting pass, a rename, a "quick cleanup" of adjacent code — none of these belong in a slice's diff unless the slice is about that.
+6. **Search before you create.** Before writing any new helper, component, hook, query, or utility, search the codebase for an existing one that does the job (or nearly does — extending beats duplicating). Amnesiac sessions are the single biggest source of redundant code in AI-assisted projects: each session happily re-creates a `formatDate`, a validation helper, or a button variant that already exists three folders away. Reuse it, or extend it; only create new when the search genuinely comes up empty — and place the new one where the Repository Standards say shared code lives, so the *next* session's search finds it.
+7. **Implement only that slice.** Touch only the files its scope actually requires, plus whatever was disclosed in step 4.
+8. **Follow the architecture strictly.** If implementation reveals the architecture doc is wrong or silent on something, stop and flag it — don't quietly patch around it and don't quietly patch the architecture doc either, unless you have standing authorization to do so.
+9. **Avoid unrelated changes.** A formatting pass, a rename, a "quick cleanup" of adjacent code — none of these belong in a slice's diff unless the slice is about that. (Cleanup has its own scheduled home: the module-close hygiene pass in Phase 10.)
 
 ### Introducing a new dependency
 
@@ -170,6 +172,12 @@ Immediately after a slice passes verification — not batched, not postponed:
 - **The Changelog** — one entry, written for a human skimming history, not for the AI itself.
 - **The "what's next" file** — overwritten (not appended) to point at the next slice, including any gaps or conflicts already discovered in that slice's own spec (see Phase 12, `methodology.md`).
 - **The module's full Feature Summary** — only when this slice is the *last* slice in its module (see Phase 12's two-tier pattern, `methodology.md`). Not every slice needs one; every module does, exactly once.
+- **The module-close hygiene pass** — also when this slice closes a module, and *as its own separate commit* so it never contaminates a feature diff. This is the scheduled home for the cleanup that Phase 8 rightly bans from feature slices, run while the module is still fresh and cheap to fix rather than saved for a giant end-of-project scrub:
+  - **Redundancy sweep**: duplicated logic within the module merged into one implementation; near-duplicate helpers/components consolidated; copy-paste variants unified behind parameters.
+  - **Dead-code sweep**: unused exports, unreachable branches, orphaned files, commented-out code, and leftover experiments deleted — run the project's dead-code/unused-dependency tooling (configured at bootstrap), don't hunt by eye alone.
+  - **Naming conformance**: every name this module introduced checked against `docs/REPOSITORY_STANDARDS.md` and the domain's real vocabulary — renames are cheap now, expensive after three more modules build on top.
+  - **TODO reconciliation**: every TODO/FIXME the module left behind either becomes a slice, a Risk Register entry, or gets deleted — none survive as vague debt.
+  - Verification (Phase 9's lint/type/test gates) runs again after the pass — hygiene that breaks the build isn't hygiene.
 - **An ADR** — only if the slice made a real architectural decision (a new library, a new external dependency, a caching strategy, a schema-shape trade-off). Most slices won't need one.
 - **A Decision Log entry** (`docs/DECISIONS.md`) — for the smaller decisions that don't rise to ADR weight but would still get silently re-litigated later if unrecorded: a naming choice with a real reason behind it, picking one library API over another already-approved one, a small trade-off made for now. One or two lines, dated, with the reason. This is what stops the same small argument from happening again in a later session — cheaper than an ADR, more durable than a comment.
 - **A Risk Register entry** (`docs/RISKS.md`) — only if the slice surfaced a meaningful technical or business uncertainty that isn't resolved yet: a dependency on an external provider whose reliability is unknown, a scaling assumption that hasn't been load-tested, a compliance question without a confirmed answer, a security trade-off accepted for now but not permanently. This is deliberately not the same document as an ADR — an ADR records a decision that was made; a risk records an exposure that hasn't been closed out. Most slices won't need this either, but when one does, it's important enough to not just leave in a comment.

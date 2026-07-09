@@ -268,10 +268,12 @@ Roadmap completion and release readiness are two different gates — a project c
 
 **Roadmap completion:**
 
+- **Requirements traceability against the PRD — the "does it do what was actually asked" gate.** Go back to the PRD (and the Phase 1/2 requirements it was built from) and walk it requirement by requirement: each one either traces to a shipped, *verified* slice, or is explicitly descoped with sign-off recorded. The roadmap can be 100% done and still not match what the user planned, because the roadmap was a *derived* document — this check closes the loop back to the source. Then walk each core user workflow end-to-end, as the user, against the PRD's description of it — not as isolated features, but as the whole task the product exists for.
 - Verify every roadmap item for the release tier is actually done, not just started.
 - Run full regression testing, not just the newest slice's tests.
-- Perform a dedicated security review across the whole surface, not just the last slice.
-- Perform load/performance testing against realistic expected traffic.
+- **Run the final whole-codebase quality audit** (checklist template in `templates.md`). The module-close hygiene passes (Phase 10, `coding-standards.md`) kept each module clean at close; this pass catches what only exists *across* modules: logic duplicated between modules that never saw each other, naming that drifted between early and late modules, unused dependencies left behind by removed features, and dead code orphaned by cross-module refactors. Run the dead-code tooling project-wide, reconcile every remaining TODO, and prune the dependency tree.
+- Perform a dedicated security review across the whole surface, not just the last slice — the Security Baseline checked against the *system*, not one diff: the full authorization matrix (every role against every sensitive action), secrets audit, and the integration rules for every external touchpoint.
+- Perform load/performance testing against realistic expected traffic, compared against the Performance Baseline's budgets.
 - Finalize all documentation — confirm the module Feature Summaries are complete for every module, and the Changelog reads as a coherent history.
 - Review `docs/RISKS.md`: every open risk is either closed, explicitly accepted by whoever owns that call, or is itself launch-blocking until resolved. Don't let it just go stale and unread.
 
@@ -292,6 +294,8 @@ Execute the production deployment only once both gates pass, then verify the spe
 - Size slices by risk, not uniformly — small where failure is expensive (schema, auth, payments, concurrency), bigger for low-risk repetitive work; over-slicing is overhead, not discipline.
 - Never rewrite working code unnecessarily.
 - Never modify unrelated files.
+- Search before you create — reuse or extend an existing helper/component before writing a twin of it; redundant code is drift the same way redundant decisions are.
+- Cleanup is scheduled work, not a side effect — module-close hygiene passes and the Final Quality Audit exist so redundancy, dead code, and naming drift get removed deliberately, in their own commits.
 - Disclose necessary but unlisted work — don't silently add it, and don't silently skip it because it wasn't named.
 - Verify empirically before trusting an assumption, especially about framework/library behavior.
 - Run the real thing before declaring a slice done — tests passing is necessary, not sufficient.

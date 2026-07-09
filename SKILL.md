@@ -49,7 +49,7 @@ Bootstrap → Classify → Discovery → Requirements → Planning Docs → Arch
 - **About to design any screen, layout, or animation — or the user mentioned a style (bento grid, a reference site) or the UI feels generic/janky**: `frontend-design.md`, starting from its Design Discovery section. The visual direction is asked for and recorded in `docs/DESIGN.md`, never defaulted.
 - **A slice just got implemented**: `coding-standards.md` Phases 9–11 (verify, document, commit).
 - **Something in the plan doesn't match reality, or implementation is stuck**: `methodology.md` Phase 14 (plan-vs-reality conflicts) and `coding-standards.md` Phase 15 (recovery procedure).
-- **Preparing to ship**: `methodology.md` Phase 16 plus `templates.md`'s Release Readiness Checklist.
+- **Preparing to ship**: `methodology.md` Phase 16 plus `templates.md`'s Final Quality Audit (PRD traceability, whole-codebase bug/security/naming/dead-code audit) and Release Readiness Checklist, in that order.
 
 ## Non-negotiable habits (apply regardless of which phase is active)
 

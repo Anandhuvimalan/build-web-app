@@ -165,6 +165,58 @@ out in place, not deleted, so the history of what was once a risk is kept.
 
 ---
 
+## Final Quality Audit (`docs/QUALITY_AUDIT.md`)
+
+Referenced in `methodology.md` Phase 16. Run once per release tier, after the last module closes, before the Release Readiness Checklist. Distinct from both: roadmap tracking asks "did we build the slices," this asks "is the *whole* now correct, clean, and what was actually asked for."
+
+```markdown
+# Final Quality Audit — <release/version>
+
+## Does it do what was planned (traceability)
+- [ ] Every PRD functional requirement traces to a shipped, verified slice —
+      or is explicitly descoped, with sign-off recorded here
+- [ ] Every business rule from Phase 2 has a named test that proves it
+- [ ] Each core user workflow walked end-to-end as the user, against the
+      PRD's own description of it (list the workflows and who walked them)
+- [ ] Open assumptions recorded during discovery revisited — each confirmed,
+      corrected, or consciously accepted
+
+## Bugs
+- [ ] Full regression suite green, run fresh (not from cache/memory of green)
+- [ ] Every "Known Issues" entry across all module Feature Summaries either
+      fixed, ticketed for a version, or explicitly accepted — none forgotten
+- [ ] Error paths exercised, not just happy paths: invalid input, permission
+      denied, provider down, empty data
+
+## Security (whole-system, beyond per-slice reviews)
+- [ ] Full authorization matrix verified: every role × every sensitive action
+- [ ] Secrets audit: nothing in source history, bundles, or logs
+- [ ] Security Baseline re-checked against the system as deployed
+- [ ] Every external integration re-checked against the integration rules
+      (signatures, idempotency, timeouts)
+
+## Naming & consistency (cross-module)
+- [ ] Names introduced early vs. late reconciled — one term per concept,
+      per REPOSITORY_STANDARDS and the domain vocabulary (no user/member/
+      account meaning the same thing in three modules)
+- [ ] API surface consistent with docs/CONVENTIONS.md end to end
+- [ ] UI conforms to docs/DESIGN.md tokens everywhere (no per-module drift)
+
+## Redundancy & dead code (cross-module)
+- [ ] Dead-code / unused-export tooling run project-wide; findings resolved
+- [ ] Unused dependencies pruned from the tree
+- [ ] Logic duplicated *between* modules consolidated (module-close passes
+      only see one module at a time — this is where cross-module twins die)
+- [ ] Zero TODO/FIXME remaining: each became a slice, a Risk entry, or was
+      deleted deliberately
+- [ ] Verification gates re-run green after all cleanup
+
+Findings that can't be fixed now go to docs/RISKS.md or the roadmap — 
+nothing discovered here is allowed to just evaporate.
+```
+
+---
+
 ## Release Readiness Checklist (`docs/RELEASE_CHECKLIST.md`)
 
 Referenced in `methodology.md` Phase 16 (Project Completion).
@@ -428,6 +480,7 @@ Worked through once, when the repository is created, before Phase 0.
 - [ ] Editor settings configured (e.g. .editorconfig)
 - [ ] Commit hooks configured (lint/format/test gates)
 - [ ] CI configured (build, lint, type-check, test on every push/PR)
+- [ ] Dead-code & unused-dependency detection configured (fits the stack; run at every module-close hygiene pass and in the Final Quality Audit)
 - [ ] Issue templates configured
 - [ ] Pull request template configured
 - [ ] Automated dependency updates configured (Dependabot/Renovate or equivalent)
