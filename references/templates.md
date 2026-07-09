@@ -233,6 +233,116 @@ each time.
 
 ---
 
+## System Conventions (`docs/CONVENTIONS.md`)
+
+Referenced in `methodology.md` Phase 3. Repository Standards covers how code *looks*; this covers how the system *behaves* — the things that silently drift between sessions unless decided once. Set in Phase 3, revised rarely, with sign-off.
+
+```markdown
+# System Conventions
+
+How this system behaves, everywhere, decided once. A slice that needs to
+deviate flags it (Phase 14) — it doesn't quietly invent a variant.
+
+## API responses
+- Success envelope: <exact shape, e.g. { data, meta }>
+- Error envelope: <exact shape, e.g. { error: { code, message, fields? } }>
+- Error codes: <the named codes and when each is used>
+- Validation errors: <shape, e.g. per-field messages under fields>
+- Pagination: <style (cursor/offset), parameter names, response metadata>
+- Versioning: <strategy, or "none until first external consumer — recorded here">
+
+## Data representation
+- Dates/times: stored and transmitted as <e.g. UTC ISO-8601>; rendered in
+  <user's timezone / fixed business timezone> at the edge only
+- Money: <e.g. integer minor units (cents) + ISO currency code — never floats>
+- IDs: <format and generation strategy>
+- Null vs. absent: <the convention, so clients aren't guessing>
+
+## Logging
+- Format: <structured (JSON) with these standard fields: timestamp, level,
+  request id, actor, event>
+- Levels: <when each is used>
+- Never logged: secrets, credentials, tokens, full PII, payment data —
+  <plus this project's specific additions>
+- Request correlation: <how a request is traced across layers>
+
+## Background work & retries (if applicable)
+- Queue/job conventions: <idempotency, retry policy, dead-letter handling>
+```
+
+---
+
+## Security Baseline (`docs/SECURITY_BASELINE.md`)
+
+Referenced in `methodology.md` Phases 3 and 6, and `coding-standards.md` Phase 9. This is the standing checklist per-slice "Security Checklist deltas" are deltas *against*. Seed it from Phase 1's quality/security bar; tighten per the Phase 0 grade.
+
+```markdown
+# Security Baseline
+
+Every slice's security review checks these. A slice's "Security Checklist
+delta" adds slice-specific items; "N/A beyond baseline" still means this
+baseline was checked.
+
+## Every slice
+- [ ] Every mutation re-checks authorization server-side (never trust the
+      client having hidden a button)
+- [ ] All input crossing a trust boundary is validated server-side (type,
+      length, range, allowed values)
+- [ ] Queries are parameterized / ORM-safe — no string-built SQL
+- [ ] Output is encoded for its context (XSS); rich text is sanitized
+- [ ] No secret, credential, or key in source control, client bundles, or logs
+- [ ] Errors shown to users leak no internals (stack traces, SQL, paths)
+- [ ] New config/secrets follow the env-handling rules (Phase 8)
+
+## Auth & session slices (additionally)
+- [ ] Passwords hashed with a current, salted algorithm
+- [ ] Auth endpoints rate-limited; lockout thresholds per the PRD's NFRs
+- [ ] Session/token expiry, rotation, and revocation per the PRD's NFRs
+- [ ] Privilege changes and sensitive actions audit-logged (per the Phase 1
+      bar — launch-blocking for regulated grades)
+
+## Integration slices (additionally)
+- [ ] Incoming webhooks verify signatures; handlers are idempotent
+- [ ] Third-party credentials are least-privilege and environment-separated
+
+## Project-specific additions
+- [ ] <from Phase 1's threat model and compliance answers>
+```
+
+---
+
+## Performance Baseline & Budgets (`docs/PERFORMANCE_BASELINE.md`)
+
+Referenced in `methodology.md` Phases 3 and 6, and `coding-standards.md` Phase 9. Budgets are numbers so the Phase 9 performance pass is a comparison, not an impression. Set them realistically in Phase 3 (informed by the Phase 1 device/network floor) and revisit deliberately, not per-slice.
+
+```markdown
+# Performance Baseline & Budgets
+
+## Standing checks (every slice)
+- [ ] No N+1 query patterns introduced (verified by inspecting actual queries,
+      not assumed)
+- [ ] Queries on hot paths hit indexes; each new index's reason is recorded
+- [ ] Unbounded lists are paginated — no "fetch all" that grows with the data
+- [ ] Payloads carry what the consumer needs, not entire entities by habit
+- [ ] Heavy work off the request path (jobs/queues) where latency matters
+- [ ] UI slices: skeletons reserve space; images sized; animation rules per
+      frontend-design.md
+
+## Budgets (numbers, checked when a slice plausibly moves them)
+| Metric | Budget | Measured how |
+|---|---|---|
+| Page load (LCP) on the floor device/network | < <e.g. 2.5s throttled 4G> | <tool> |
+| Initial JS bundle (gzipped) | < <e.g. 200KB> | <build output> |
+| API latency, p95, hot endpoints | < <e.g. 300ms> | <tool/logs> |
+| Slowest acceptable query | < <e.g. 100ms, or recorded reason> | <EXPLAIN/logs> |
+| <project-specific: search, report generation, import throughput…> | | |
+
+Budget misses are Phase 14 conflicts: flagged and decided (optimize, or
+consciously revise the budget) — never silently absorbed.
+```
+
+---
+
 ## Design System (`docs/DESIGN.md`)
 
 Referenced throughout `frontend-design.md` (Book 4) and produced in Phase 3 for any project with a UI. Set once in design discovery, revised rarely, only with explicit sign-off — every UI slice follows it without re-deciding it.
@@ -290,8 +400,8 @@ A slice is Ready when all of the following are checked:
 - [ ] Dependencies are actually complete, not "should be fine"
 - [ ] Acceptance criteria are written down
 - [ ] Named test cases are defined
-- [ ] Security Checklist delta is written (or "N/A beyond standard")
-- [ ] Performance Checklist delta is written (or "N/A beyond standard")
+- [ ] Security Checklist delta against docs/SECURITY_BASELINE.md is written (or "N/A beyond baseline")
+- [ ] Performance Checklist delta against docs/PERFORMANCE_BASELINE.md is written (or "N/A beyond baseline")
 - [ ] Files likely to change are identified
 - [ ] Required agent role(s)/context are identified
 

@@ -129,6 +129,9 @@ Produce the following as durable, versioned documents (not chat history):
 | **Implementation Workflow** | What exact stage sequence does every slice go through? |
 | **Repository Standards** (`docs/REPOSITORY_STANDARDS.md`, see `coding-standards.md`) | What does correctly-styled code in this repo look like — naming, import ordering, folder/file conventions, error-message style, logging style, comments policy, commit message format? |
 | **Design System** (`docs/DESIGN.md`, see `frontend-design.md`) — only if the project has a UI | What is the chosen visual direction and why? What are the layout system, tokens (spacing, type, color roles, radii, motion), per-breakpoint behavior, and workflow patterns (quick-add, bulk-add) every UI slice follows without re-deciding them? |
+| **System Conventions** (`docs/CONVENTIONS.md`, template in `templates.md`) | How does the system *behave* consistently across sessions — API response/error envelope, pagination, dates/timezones/money representation, structured-logging shape and never-log list? Repository Standards covers how code *looks*; this covers how it *acts*. |
+| **Security Baseline** (`docs/SECURITY_BASELINE.md`, template in `templates.md`) | The standing security checks every slice is reviewed against. Per-slice "Security Checklist deltas" (Phase 6) are deltas *against this document*. |
+| **Performance Baseline & Budgets** (`docs/PERFORMANCE_BASELINE.md`, template in `templates.md`) | The standing performance checks and the project's *numeric* budgets (page load, bundle size, API latency, query time). Per-slice "Performance Checklist deltas" are deltas against this; Phase 9's performance pass compares against these numbers, not vibes. |
 
 These become **the project's single source of truth**. Once approved, no other document — and no chat conversation — should silently contradict them. If a downstream document needs to diverge from the PRD, the PRD is updated first, with a note explaining why, not quietly worked around.
 
@@ -176,13 +179,23 @@ Split every module into slices small enough to implement, review, and document i
 
 - Has one responsibility (one schema addition, one action, one page, one service function)
 - Is independently testable — it has its own named test cases, not "tests will come later"
-- Has a Security Checklist delta and a Performance Checklist delta, even if both say "N/A beyond standard" — forcing the question is the point
+- Has a Security Checklist delta and a Performance Checklist delta — deltas *against the project's standing baselines* (`docs/SECURITY_BASELINE.md`, `docs/PERFORMANCE_BASELINE.md`, templates in `templates.md`), even if both say "N/A beyond baseline" — forcing the question is the point
 - Has minimal dependencies, and those dependencies are stated explicitly
 - Never spans two modules' worth of unrelated work
 
 **Slice size rule:** if a slice cannot reasonably be implemented, reviewed, tested, documented, and committed within a single focused session (roughly 1–3 hours), split it before implementation begins. A slice that keeps growing mid-implementation should be paused and split, not pushed through as one oversized commit.
 
 **Never implement multiple slices at once**, even when they feel related. "I'm already in this file" is not a reason to expand scope — it's exactly the moment scope drift happens.
+
+### Right-sizing: slices are a risk instrument, not a ritual
+
+Slicing is not free. Every slice carries a fixed overhead — the cold-start reading, the Ready check, verification, documentation, the commit — and if slices are cut too small, that overhead dominates and the process gets slower with no safety gained. The point of a slice is **the unit of verification and recovery**: small enough that when something breaks, the cause is localized to one change, and abandoning it costs one slice, not a week. Calibrate deliberately:
+
+- **Size by risk, not uniformly.** Schema changes, auth/authorization, payments, and anything with concurrency implications get *small* slices — these are where a tangled failure is most expensive to unwind. Low-risk, repetitive work gets *bigger* slices: five similar CRUD endpoints, or one screen's set of similar states, can be **one slice with five named test cases** — splitting work that trivially rhymes into five ceremonies is over-slicing, not discipline.
+- **One responsibility ≠ one tiny step.** The rule is one *responsibility* per slice. "The supplier CRUD endpoints" is one responsibility; "the CREATE endpoint" and "the DELETE endpoint" as separate slices is usually ceremony.
+- **Signs of over-slicing** (merge slices): the overhead steps routinely take longer than the implementation itself, verification never catches anything because each change is trivial, and the per-slice notes read as near-duplicates.
+- **Signs of under-slicing** (split slices): verification failures are hard to localize to a cause, diffs span many layers at once, the session exhausts its context mid-slice, or review becomes skimming because the diff is too big to actually read.
+- **The Phase 0 grade sets the default**: a Prototype tolerates big slices and light gates — speed of learning is the goal; Production and Regulated projects bias small in the risky areas listed above and normal-sized elsewhere. Uniformly tiny slices everywhere is the accidental-decision version of calibration, same as skipping Phase 0 is.
 
 ---
 
@@ -206,6 +219,9 @@ This is the phase that makes a project survivable across dozens of separate AI s
 | `docs/RELEASE_CHECKLIST.md` | The final gate before a production deployment, separate from feature completeness | Checked immediately before each release (see Phase 16) |
 | `docs/REPOSITORY_STANDARDS.md` | Naming, style, and convention rules every session follows without re-deciding them | Set early; revised rarely, only with explicit sign-off |
 | `docs/DESIGN.md` (UI projects only, see `frontend-design.md`) | The approved design direction, tokens, layout system, and workflow patterns every UI slice follows | Set in Phase 3; revised rarely, only with explicit sign-off |
+| `docs/CONVENTIONS.md` | System behavior conventions: API/error envelope, pagination, dates/money, logging shape | Set in Phase 3; revised rarely, only with explicit sign-off |
+| `docs/SECURITY_BASELINE.md`, `docs/PERFORMANCE_BASELINE.md` | The standing checklists (and numeric budgets) that per-slice deltas and Phase 9 reviews run against | Set in Phase 3; budgets revisited only deliberately |
+| `.env.example` + a config section in the docs | Every environment variable the system needs, documented in the same commit that introduces it | Updated per slice, whenever config is added (see Phase 8) |
 | `PROJECT_BOOTSTRAP.md` | One-time repo setup checklist (CI, hooks, templates, security policy) | Once, at repo creation; not part of the ongoing per-slice cycle |
 
 All templates for these files are in `templates.md`.
@@ -273,6 +289,7 @@ Execute the production deployment only once both gates pass, then verify the spe
 - One source of truth — and when something contradicts it, the source of truth wins until it's deliberately changed.
 - One slice at a time.
 - One responsibility per slice.
+- Size slices by risk, not uniformly — small where failure is expensive (schema, auth, payments, concurrency), bigger for low-risk repetitive work; over-slicing is overhead, not discipline.
 - Never rewrite working code unnecessarily.
 - Never modify unrelated files.
 - Disclose necessary but unlisted work — don't silently add it, and don't silently skip it because it wasn't named.

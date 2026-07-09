@@ -60,8 +60,8 @@ Phase 9 (below) defines when a slice is *done*. A slice shouldn't start until it
 - Its stated dependencies are actually complete (not "should be fine")
 - Its acceptance criteria are written down, not implied
 - Its named test cases are defined, not deferred to "we'll figure out tests later"
-- Its Security Checklist delta is written, even if "N/A beyond standard"
-- Its Performance Checklist delta is written, even if "N/A beyond standard"
+- Its Security Checklist delta (against `docs/SECURITY_BASELINE.md`) is written, even if "N/A beyond baseline"
+- Its Performance Checklist delta (against `docs/PERFORMANCE_BASELINE.md`) is written, even if "N/A beyond baseline"
 - The files it's expected to touch are identified
 - The agent role(s) or context (Phase 7) it needs are identified
 - If the slice has a UI surface: `docs/DESIGN.md` exists and covers this screen's layout system and tokens, and the slice's spec names its empty/loading/error/populated states (see `frontend-design.md`) — a UI slice designed only in its populated state is not Ready
@@ -92,6 +92,41 @@ A third-party package is a standing liability, not a free convenience — it's c
 
 This applies to genuinely new packages, not to using more of a dependency that's already justified and in place. For regulated/enterprise-grade projects (Phase 0, `methodology.md`), treat all four as launch-blocking, not advisory — a security or license review that finds an unvetted dependency late is far more expensive than five minutes of justification up front.
 
+### Schema & migration slices
+
+Schema changes are the highest-blast-radius thing a session does — code can be reverted; a botched migration against real data often can't. Standing rules, regardless of stack:
+
+- **Migrations are forward-only and immutable once applied anywhere beyond the local machine.** A wrong migration gets a new corrective migration, never an edit — editing an applied migration forks reality between environments.
+- **Test the migration against a production-like copy of the data when it's written**, in its own slice's verification — not for the first time at release. Empty-database success proves almost nothing; real data has the nulls, duplicates, and orphans that break migrations.
+- **Destructive changes use the expand–contract pattern, as separate slices**: (1) add the new column/table and write to both, (2) backfill and switch readers, (3) only then drop the old one — each step deployed and verified independently. Never rename or drop in the same slice that adds the replacement; that's the zero-downtime rule and the rollback rule in one.
+- **Seed and reference data are versioned migrations too**, not manual inserts someone has to remember per environment.
+- **Every index has a reason recorded** (the query it serves), and every new query pattern asks whether it needs one — this pairs with the Performance Baseline's no-unindexed-hot-query rule.
+
+### Configuration & environment changes
+
+The slice that introduces an environment variable updates `.env.example` **and** the config documentation *in the same commit* — not later, not at release. "Works locally, staging is missing a variable nobody wrote down" is otherwise guaranteed, and it always surfaces at the worst moment. Differences between dev/staging/prod behavior (a stubbed provider, a disabled job) are recorded when created. Secrets never enter source control or client bundles — that's a Security Baseline check, verified per slice, not a launch-day discovery.
+
+### Third-party integration slices
+
+Payments, email, webhooks, external APIs — where "worked in the demo" and "works in production" diverge most:
+
+- **Sandbox/test-mode first, always**; switching to live credentials is its own explicitly-verified step (Phase 16 confirms it, but the switch itself is never silent).
+- **Every incoming webhook verifies the provider's signature and is idempotent** — providers redeliver, sometimes many times; an unverified or non-idempotent handler is both a security hole and a double-charge/double-email bug waiting.
+- **Every outgoing call has a timeout and a decided failure behavior** (retry with backoff, queue, or fail loudly — chosen, not defaulted), recorded in the Decision Log. What the user sees when the provider is down is part of the slice's spec, not an exercise for production.
+
+### Mutation slices — the concurrency checklist
+
+AI-generated code is systematically single-user-minded; these questions are asked (and answered in the slice's notes) for every slice that writes data:
+
+- **What happens when two users do this at the same instant?** Uniqueness and referential rules are enforced by *database constraints*, not application-level "check then insert" — the check-then-act gap is a race by construction.
+- **Is every multi-step write wrapped in a transaction**, so a failure halfway can't leave half-written state?
+- **Is the operation safe against double-submit and network retries** — idempotent by design, or protected by an idempotency key for anything money-adjacent?
+- **Are numeric updates atomic** (`SET stock = stock - 1 WHERE stock > 0`-style), never read-modify-write from application memory? Stock counts, balances, and quotas are exactly where this bug costs real money and only appears under production load.
+
+### Risky slices ship behind a flag
+
+For a system with real users, a slice that changes existing behavior riskily (a payment flow change, a data-model switch, a rewrite of a hot path) ships behind a feature flag with a defined kill switch — deploying and releasing become separate decisions, and a bad release becomes a toggle, not a rollback. Two rules keep this from rotting: the flag's *removal* is scheduled as its own future slice when the flag is created (permanent flags are dead code with extra branches), and the off-state is verified too — a kill switch nobody tested is a hope, not a control.
+
 ---
 
 ## Phase 9 — Verification
@@ -104,11 +139,25 @@ A slice is not complete until all of the following pass — and passing means ac
 - Integration tests, where the slice's behavior spans a real boundary (a real database, a real HTTP call)
 - End-to-end verification for anything with a runtime surface — actually start the app and drive the feature, in a real browser or real CLI invocation, not just through mocks. **This step catches classes of bugs the other steps structurally cannot**: a database that was never migrated, a test isolation leak that pollutes real dev state, an assumption about framework behavior that was subtly wrong, a form validation bug that only manifests with real input shapes (an unchecked checkbox, a null vs. undefined value). Treat "I ran it and watched it work" as a distinct, non-optional verification step, not a nice-to-have.
 - For slices with a UI surface, the end-to-end step expands to the **UI verification checklist in `frontend-design.md`**: multiple viewports, all four content states (empty/loading/error/populated), a throttled-network and throttled-CPU pass, zero layout shift, the transform/opacity animation rule, `prefers-reduced-motion`, keyboard-only operation, contrast/touch targets, draft protection on long forms, and conformance to `docs/DESIGN.md` tokens.
-- Security review against the slice's Security Checklist
-- Performance review against the slice's Performance Checklist
+- Security review against the project's **Security Baseline** (`docs/SECURITY_BASELINE.md`) plus the slice's stated delta — the baseline is the checklist; the delta is what this slice adds to it
+- Performance review against the project's **Performance Baseline & Budgets** (`docs/PERFORMANCE_BASELINE.md`) plus the slice's delta — a numeric comparison where budgets exist (load time, bundle size, latency), not an impression
 - Code review for correctness, reuse, and scope discipline — a pass distinct from the security/performance passes, ideally done by inspecting the diff as if you didn't write it
 
 When a test fails, the default assumption is that the implementation is wrong, not the test. Never weaken an assertion to make a broken behavior pass.
+
+### Which layer a test belongs to
+
+"Tests exist" is not a strategy. The default distribution, adapted per project in the planning docs:
+
+- **Unit tests** for pure logic: business rules, calculations, validation, state transitions. Fast, many, no I/O.
+- **Integration tests** for anything that crosses a real boundary — a real (local/test) database, a real HTTP handler. This is where constraint enforcement, transactions, and the concurrency checklist above get proven, because mocks structurally cannot prove them.
+- **A few real end-to-end tests** for the money paths — the flows the business actually depends on — kept few because they're slow and brittle in bulk.
+
+Three rules that matter *especially* for AI-written tests:
+
+- **Test behavior, not implementation.** A test that mocks every collaborator and asserts internal call order will happily stay green while the real app is broken — over-mocked tests are how "tests pass but nobody ran it" happens *with* tests. If a test would survive a correct refactor and fail on a real behavior change, it's testing the right thing.
+- **Test data comes from factories/builders per test, never shared mutable seed data** — shared fixtures are how test-isolation leaks and order-dependent flakiness get built.
+- **A flaky test is a bug, fixed the day it's noticed** — never rerun-until-green, never quarantined indefinitely. A suite that's allowed to be flaky stops being evidence, and Phase 9 runs on evidence.
 
 ---
 
