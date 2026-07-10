@@ -406,6 +406,10 @@ The approved design direction. UI slices follow this without re-deciding it;
 per-slice style inventions are source-of-truth drift (see frontend-design.md).
 
 ## Direction
+- Design concept: <one or two sentences — the dominant content shape, the
+  domain's own visual vocabulary, and the one visual idea a first-time viewer
+  should get in three seconds. Derived from the project itself, not a style
+  preference; see frontend-design.md's Design Discovery>
 - Chosen direction: <bento grid / editorial / dense console / minimal / reference-derived>
 - Chosen by: <who>, on <date> — from options offered in design discovery, not defaulted
 - Reference site(s), if any: <URL> — measured in a real browser on <date>, values below
@@ -420,15 +424,34 @@ per-slice style inventions are source-of-truth drift (see frontend-design.md).
   becomes, and the deliberate stack order on mobile)
 
 ## Tokens
-- Spacing scale: <base unit and steps, e.g. 4 / 8 / 16 / 24 / 32 / 48 / 64>
+- Spacing scale: <base unit and steps, e.g. 4 / 8 / 16 / 24 / 32 / 48 / 64> —
+  every container's padding/gap is one of these steps, no invented values
+  (see frontend-design.md's Geometry & Spatial Composition)
 - Type scale: <display / heading / body / caption — size, weight, line-height>
 - Color roles: <background layers, surface, text hierarchy, accents — as roles>
 - Radii: <values, and where each applies>
-- Motion tokens: <2–3 duration+easing pairs, e.g. micro 150ms ease-out;
-  entrance 250ms ease-out> — and the standing rules: transform/opacity only,
-  prefers-reduced-motion respected
+- Motion tokens: <named easing curves, e.g. ease-out-standard:
+  cubic-bezier(0.16, 1, 0.3, 1) for entrances, ease-in-out-standard:
+  cubic-bezier(0.65, 0, 0.35, 1) for moves; plus one spring config for
+  interactive elements, e.g. stiffness 300 / damping 30 / mass 1> — standing
+  rules: transform/opacity only, prefers-reduced-motion respected
 - Animation library: <CSS only / Framer Motion / GSAP> — per the Decision Log
   entry of <date>; lazy-loaded, never in the first-paint path
+
+## First-visit intro
+- Decision: <pattern chosen (e.g. split-text headline build, masked hero
+  reveal, structural frame-in) and why it fits the design concept above — or
+  "none, deliberately, because <reason>">
+- Total duration: <ms, ceiling ~600–1200ms>
+- Runs once per session: <mechanism, e.g. sessionStorage flag>
+- Skip path: <what input short-circuits it>
+- Reduced-motion behavior: <collapses straight to settled state>
+
+## Component micro-specs (running list)
+- Dropdown/select: <link to the anatomy in frontend-design.md's Component
+  Micro-Design, plus any project-specific deviation and why>
+- <other recurring small component, if its spec deviates from the book's
+  default anatomy — most won't need an entry here>
 
 ## Workflow patterns in force
 - Quick-add on reference dropdowns: <where it applies>

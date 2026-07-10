@@ -38,17 +38,50 @@ None of this is optional busywork — it's exactly the kind of thing that's expe
 
 ---
 
-## Phase 7 — AI Agent Responsibilities
+## Phase 7 — Multi-Agent Orchestration
 
-If using role-specialized agents (or just role-specialized *thinking*, even solo), define per-role documents:
+A session with access to genuine parallel subagents (Claude Code's Agent tool, or an equivalent orchestration layer) can move faster than one thread working serially — but only if the fan-out is deliberate. Dispatching agents by reflex ("split this into five agents") produces conflicting edits, duplicated work, and integration debt that costs more than the parallelism saved. This phase is concrete rules for when and how to actually use parallel agents, plus the role-scoping discipline that makes each one effective whether or not it runs in parallel.
 
-- Frontend, Backend, Database/DAL, API, Testing, Security, Performance, SEO, Documentation, Review
+### Role scoping, whether solo or parallel
 
-For each: what files it may touch, what files it must never touch, what it reads before starting, what it hands off when done. This turns "review every mutation for security" from a scavenger hunt into "read one folder." The Frontend role's reading list always includes `docs/DESIGN.md` and `frontend-design.md` (Book 4).
+Whether one thread is doing role-specialized *thinking* or several agents are doing it in parallel, define per-role boundaries — Frontend, Backend, Database/DAL, API, Testing, Security, Performance, Documentation, Review — for each: what files it may touch, what files it must never touch, what it reads before starting, what it hands off when done. This turns "review every mutation for security" from a scavenger hunt into "read one folder." The Frontend role's reading list always includes `docs/DESIGN.md` and `frontend-design.md` (Book 4).
 
-**Load only the roles the current slice actually needs.** A schema-only slice doesn't need the frontend role's context; a pure-UI slice doesn't need the database role's. This is a context-management technique, not just an organizational one — every role document loaded is tokens spent before real work starts.
+**Load only the roles the current slice actually needs.** A schema-only slice doesn't need the frontend role's context; a pure-UI slice doesn't need the database role's — every role's context loaded is tokens spent before real work starts, for a solo thread and doubly so for an agent you're dispatching. Some slices genuinely span roles (a slice that adds a table *and* the action that writes to it *and* the page that calls it) — say so explicitly rather than pretending it's single-role, and load all the roles it actually touches.
 
-Some slices genuinely span roles (a slice that adds a table *and* the action that writes to it *and* the page that calls it). When that happens, say so explicitly rather than pretending it's single-role — and load all the roles it actually touches.
+### When fan-out is worth it
+
+Parallelize when the sub-tasks are **genuinely independent** — no sub-task's output changes what another needs to do, and no two sub-tasks write to the same files:
+
+- **Independent research/investigation** — "how does the current codebase handle X," "what does library Y's current API look like," "what's the existing test coverage for Z" have no dependency on each other and can run as parallel read-only agents whose findings you synthesize yourself before deciding anything.
+- **Independent slices in disjoint file sets** — two roadmap slices that touch no shared file (a backend endpoint slice and an unrelated frontend copy fix, say) can implement in parallel, each in its own agent, **only if given filesystem isolation** (a worktree per agent) so neither's uncommitted changes collide with the other's or with the main session's working tree.
+- **Independent review passes** — a correctness review and a security review of the same diff are legitimately parallel, because review doesn't mutate anything; each agent reads the diff and reports findings without touching files.
+- **Parallel design exploration** — when a genuinely open visual/UX question has more than one reasonable answer (rare, since Design Discovery should already have resolved direction — `frontend-design.md`), spinning up parallel agents to prototype two directions for comparison is legitimate, distinct from having them build the same feature twice by accident.
+
+**Do not parallelize the core implement → verify → document → commit loop for a single slice.** That loop is inherently sequential (code can't be verified before it's written), and running "one agent to implement, another to write tests, another to write docs" for the same slice at the same time is coordination overhead dressed up as speed. One slice, one thread, still.
+
+### Scoping each agent
+
+Every dispatched agent starts with zero memory of this conversation — it does not share your context, your prior decisions, or your understanding of *why* the task matters. A prompt that assumes shared context produces an agent that guesses, and guessing is exactly what this whole workflow exists to prevent. Every agent's brief states, explicitly:
+
+- **The role and its boundary** — which single role (above) this agent needs, what files it may touch, what it must never touch.
+- **What it needs to read first** — the specific docs (architecture, the relevant module's Feature Summary, `docs/DESIGN.md` for anything touching UI), not "read the codebase," which either wastes its context budget or gets skipped.
+- **The actual task and its acceptance criteria** — what "done" means for this agent, concretely enough that its output can be checked without redoing the work.
+- **What to hand back** — a diff, a report, a set of findings — and in what shape, so the orchestrating session can act on it without another round-trip to ask.
+
+A one-line prompt to a subagent is a false economy: the agent fills the gaps with assumptions, and cleaning up a wrong assumption after the fact costs more than writing the brief would have.
+
+### Isolation and reconciliation
+
+Parallel agents that write code need filesystem isolation — concurrent, uncoordinated edits to the same working tree are a race condition applied to source control. Use a worktree (or equivalent) per implementing agent, and treat the merge back to the main branch as its own explicit step, never an assumption:
+
+1. Each implementing agent finishes on its own branch/worktree, self-reviewed against its own role's checklist.
+2. The orchestrating session reviews each agent's diff **as if it hadn't requested it** — the "review the diff as if you didn't write it" discipline from Phase 9, applied doubly here, because a subagent's account of its own work is a claim, not a verification.
+3. Conflicts between two agents' changes — same file touched, or worse, the same *concept* implemented two different ways — are resolved explicitly before either merges, never by silently taking one and discarding the other's reasoning without checking why they diverged.
+4. The one-slice-one-commit rule (Phase 11) still holds after reconciliation. Multiple agents' work merging into the main branch does not mean multiple uncoordinated commits; it means the orchestrating session commits deliberately, per slice, same as solo work.
+
+### What doesn't change
+
+Everything else in this workflow applies to agent-produced work exactly as it applies to your own: a subagent's slice still needs to be Ready before it starts (Phase 8), still goes through full Verification (Phase 9) — re-run by the orchestrating session, not taken on the subagent's word — still gets documented (Phase 10), and still follows the disclosure rule (necessary-but-unlisted work gets surfaced, whether the session doing the surfacing is you or an agent reporting back to you). Parallelism changes how the work gets produced; it changes nothing about how the work gets trusted.
 
 ---
 
