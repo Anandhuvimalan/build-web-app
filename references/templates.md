@@ -453,6 +453,16 @@ per-slice style inventions are source-of-truth drift (see frontend-design.md).
 - <other recurring small component, if its spec deviates from the book's
   default anatomy — most won't need an entry here>
 
+## Shape vocabulary (only if this project uses cut/clipped card shapes)
+- Docking notch/blister construction: <controls it's sized for, clearance used>
+- Chamfer ratio: <e.g. ~12% of card's shorter side>
+- Scatter pattern grid unit + opacity falloff: <values>
+- Organic blob lobe proportions: <values, or "not used">
+- Source: <derived from a supplied asset kit at <path/URL>, re-authored at this
+  project's own sizes — not copied verbatim, per frontend-design.md>
+- Responsive technique: <inline SVG behind content (default) / clip-path with
+  resize recompute — and why>
+
 ## Workflow patterns in force
 - Quick-add on reference dropdowns: <where it applies>
 - Bulk add: <which entry screens offer it, and via what (inline table / CSV)>
