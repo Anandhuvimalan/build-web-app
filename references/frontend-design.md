@@ -50,10 +50,10 @@ Record the answer as the project's **design concept** in `docs/DESIGN.md`, in on
 When the user names a reference site, inspect it in a real browser (with browser tooling such as Claude in Chrome, or DevTools by hand) and extract **concrete measurements** — the difference between "inspired by" and "vaguely reminiscent of" is numbers:
 
 - **Layout grid**: container max-width, number of columns, gutter width, outer margins at each breakpoint. Measure them; don't estimate from a screenshot.
-- **Type scale**: the actual font sizes, weights, and line-heights in use for display, heading, body, and caption text — and the ratio between steps.
+- **Type scale**: the actual font sizes, weights, and line-heights in use for display, heading, body, and caption text — and the ratio between steps (see Typography System, below, for how to turn this into a stated ratio rather than a copied list of numbers).
 - **Spacing rhythm**: the base spacing unit (commonly 4 or 8px) and the recurring gaps between sections, cards, and controls.
 - **Shape language**: corner radii (uniform or mixed), border and divider treatment, shadow depth, any clipping/masking of images.
-- **Color roles**: background layers, surface, text hierarchy, one or two accents — captured as roles, not just a list of hex codes.
+- **Color roles and distribution**: background layers, surface, text hierarchy, one or two accents — captured as roles, not just a list of hex codes — plus a rough read of how much of the page each occupies (see Color System, below, for turning that into a stated ratio and harmony rule).
 - **Motion character**: what animates on the reference site (hover, scroll, page transitions), how fast, and how much. Match the *restraint* too — most admired sites animate far less than people remember.
 
 Write the extracted values into `docs/DESIGN.md` as the project's tokens. This is the anti-hallucination discipline of Phase 13 applied to design: "I looked at the actual site and measured it" versus "I know roughly what that kind of site looks like" are different confidence levels, and only the first one is allowed to become a token.
@@ -139,6 +139,78 @@ When a project supplies its own shape/asset library (a Figma export, an SVG fold
 ### The alternatives, so the choice is a real one
 
 Offer these alongside bento in discovery, each in one honest line: **editorial/typography-led** (large type, generous whitespace, few images — content-heavy products, brand-forward marketing); **dense console** (compact tables, minimal chrome, keyboard-first — heavy-use internal tools); **minimal utilitarian** (few elements, high contrast, near-zero decoration — single-purpose tools); **reference-derived** (extracted from a site the user loves — often the best answer when it exists).
+
+---
+
+## Color System
+
+The AI-default palette is recognizable on sight: a blue or indigo primary, a white/light-gray surface, and a purple gradient hero — chosen because it's inoffensive, not because anything about the project asked for it. A color system prevents that the same way the layout system does: **a distribution rule and a harmony rule are chosen deliberately, from the design concept, and stated as a ratio and a role table** — not picked hex-by-hex until it "looks nice."
+
+### The distribution rule — how much of each color, stated as a ratio
+
+Pick one, explicitly, and record it as roughly-measurable percentages in `docs/DESIGN.md` — the point isn't which rule wins, it's that *a* rule is chosen instead of every component deciding its own amount of color:
+
+- **60-30-10** (dominant / secondary / accent) — the safest default for most content-heavy or dashboard products: 60% a neutral dominant (background/surface), 30% a supporting tone (secondary surface, muted text, borders), 10% one accent reserved for what must draw the eye (primary actions, links, key data points). The *scarcity* of the 10% is what makes it work — spend it only on things that need to win the user's attention, not on every icon and border.
+- **90-10 (or more extreme, 95-5)** — the right call when a minimal/utilitarian or restrained-editorial concept makes near-monochrome the brand statement; the accent should feel almost startling on arrival, used at one or two moments per screen, never spread thin.
+- **40-30-20-10** (dominant / secondary / tertiary / accent) — for content with a genuine third visual tier before the true accent (a dense dashboard with background, card-surface, and a distinguishable "highlighted" tier).
+- **70-20-10, brand-as-environment** — when the concept calls for the brand color as the field itself (a hero panel that *is* brand-orange, not just accented with it), backed by a calm near-neutral secondary for legibility surfaces. Only earns this when the concept explicitly wants that confidence — it's the loudest of these rules and wrong by default.
+
+Tie the choice to the design concept question from Design Discovery: a domain's own visual vocabulary usually implies the rule (a trading tool's restraint implies 90-10 or a tight 60-30-10 with a single alert accent; a playful consumer brand can sustain 70-20-10 with itself as the field).
+
+### The harmony rule — how the hues relate to each other
+
+Construct the palette's hues from one named harmony, not by eye:
+
+- **Monochromatic** (one hue, varying lightness/saturation) — the safest professional or dense-console choice; sophistication comes entirely from value/saturation steps, with one true accent hue breaking the family for actionable elements.
+- **Analogous** (adjacent hues) — calm and cohesive; a good base for editorial, content-heavy, or lifestyle concepts; needs one deliberately different accent (often near the complement of the family) or it reads as flat.
+- **Complementary** (opposite hues) — high contrast and energy; good for a single unmistakable CTA against a calm base; risky at large, equally-saturated areas (it vibrates) — use one side of the pair as the scarce accent only, never both at equal weight.
+- **Split-complementary** (a base hue plus the two hues adjacent to its complement) — most of complementary's contrast with less visual tension; a good middle ground when the concept wants energy without a clash.
+- **Triadic** (three hues evenly spaced) — vibrant and playful, but needs a firm distribution rule (60-30-10 or stricter) or it reads as a rainbow instead of a designed triad: one hue dominant, the other two used sparingly and *unevenly* — never as equal thirds.
+
+### Roles, not hex codes
+
+Define color the same way the reference-site extraction does: as a **role table**, one value per role per theme, not a loose list of hex codes reused ad hoc — Background/Base, Surface (cards/panels), Border/Divider, Text-primary, Text-secondary, Text-disabled, Accent-primary (the scarce color from the distribution rule), Accent-secondary (rare — a second-tier action), and Semantic (success/warning/danger/info). **Semantic colors sit outside the brand harmony** — chosen for universal recognizability (the green/amber/red family) regardless of what the harmony rule picked, because status legibility overrides brand aesthetics; never let "but it clashes with our purple" reassign what red means.
+
+### Contrast is arithmetic, not a vibe check
+
+- Every text/background pairing hits WCAG AA (4.5:1 body text, 3:1 large text and UI components) — check the actual computed pair the product uses, not the brand colors in isolation. This is already part of UI Slice Verification, below; the color system is where the pairs that need checking get decided.
+- Never convey status by color alone — pair every semantic color with an icon or label for colorblind users.
+- **Check the accent color's contrast first and specifically** — it usually sits on a button behind white or near-white text, which is exactly where a color chosen for hue alone (not for how it performs as a background) fails contrast.
+
+### Dark mode is a derivation, not an inversion
+
+Don't flip lightness values and call it done — recompute each role deliberately: dark surfaces usually want to keep a *trace* of the brand hue rather than going fully neutral (fully desaturated dark UI reads as muddy); the text hierarchy keeps its *relative* contrast steps, not its absolute values; and the accent color often needs its own lightness/saturation retuned for a dark background — a saturated accent that pops on white can vibrate or lose contrast on near-black. Record the dark-theme role table as its own set of values, not "same hex, dark background."
+
+Record in `docs/DESIGN.md`: the chosen distribution ratio, the harmony type and base hue(s), the full role table for light (and dark, if supported) themes, and which pairings were contrast-checked.
+
+---
+
+## Typography System
+
+The same content-decides-it principle applies to type: the typeface, the scale, and the pairing are derived from what the product actually contains and how it's read, not picked from a "good font pairings" list.
+
+### Choosing the typeface(s) from the content
+
+- **What's the dominant reading mode?** Scanning dense data (a console, a finance tool) wants strong numeral legibility and tabular figures (clear 1/l/I and 0/O distinction, `font-variant-numeric: tabular-nums` for anything in a column). Long-form reading (editorial, docs, a blog) wants a text-optimized serif or humanist sans with a generous x-height and real italics. A brand-forward marketing headline wants a distinctive display face for the headline tier *only*, paired with a plain, highly legible workhorse for body — never the display face at body size, where its personality becomes a legibility tax.
+- **One display/heading family plus one body family is the usual ceiling.** A third family — often monospace — is justified only when the content includes real code or tabular data that benefits from fixed-width alignment. Every additional family beyond that is a dependency-weight decision like any other (Book 2, Phase 8): justify it, or don't add it.
+- **Match shipped weights to what's actually used.** Don't ship nine weights of a variable font when the type scale below uses three — every unused weight is bytes on the wire for nothing.
+
+### The type scale is a ratio, not a feeling
+
+- Pick a scale ratio sized to the content's hierarchy depth: a **minor third (1.2)** or **major third (1.25)** for content with many close-together levels (dense UI, admin panels) where adjacent sizes should feel related, not violently different; a **perfect fourth (1.333)** or the **golden ratio (1.618)** for editorial/marketing content that wants a confident, dramatic jump from body to display headline.
+- Compute the scale from a base (commonly 16px body), multiplying by the ratio per step and rounding to sensible values — this is arithmetic exactly like the spacing scale (Geometry & Spatial Composition, below), and belongs in `docs/DESIGN.md` as a table (display/h1/h2/h3/body/caption — size, weight, line-height), not re-guessed per screen.
+- **Line-height tightens as size increases.** Large display type wants tighter line-height (~1.0–1.15) because its own letterforms already provide visual separation; body text wants generous line-height (~1.4–1.6) because dense small text needs the extra vertical air to stay readable. One line-height value reused at every size is a common tell that the scale wasn't actually designed.
+- **Line length (the 45–75ch measure) is the type scale's real partner** — a well-built scale still produces unreadable paragraphs at any font size if the container isn't also capped to a measure; see Geometry & Spatial Composition, below.
+
+### Pairing has a mechanical check, not just a look
+
+Two typefaces pair well when they're either clearly **contrasting** in structure (a geometric sans display against a humanist serif body — different enough that the pairing reads as deliberate) or from the same **superfamily** (a sans and serif designed together to share metrics and proportions). Avoid pairing two faces that are almost-but-not-quite similar (two different humanist sans faces at similar weights) — that reads as an accident, not a choice.
+
+### Performance is part of the type decision
+
+Self-host or use `font-display: swap` with a metric-matched fallback font, so the fallback-to-webfont swap doesn't reflow the page (a layout-shift bug — see Motion & Performance Discipline, below); subset variable fonts to the weights and character sets actually used. A third or fourth typeface family is a bundle-size cost that has to justify itself the same as any other dependency.
+
+Record in `docs/DESIGN.md`: the chosen families and why (tied to the content/reading-mode reasoning above), the scale ratio and base, the full scale table with line-heights, and the font-loading strategy.
 
 ---
 
@@ -290,9 +362,10 @@ For any slice with a UI surface, Phase 9's end-to-end verification step expands 
 - [ ] **`prefers-reduced-motion` verified** to actually reduce motion
 - [ ] **Keyboard-only pass**: every interactive element reachable and operable, focus visible, tab order sane; dropdown quick-add and modals trap and return focus correctly
 - [ ] Hover, focus, active, and disabled states present on interactive elements
-- [ ] Text contrast meets WCAG AA; touch targets are comfortably tappable (~44px)
+- [ ] Text contrast meets WCAG AA; touch targets are comfortably tappable (~44px); the accent color's specific pairings (e.g. button text on button background) checked, not just body text
+- [ ] If the project supports dark mode: verified against its own re-derived role table, not assumed to be "the same but inverted"
 - [ ] Any form worth >30 seconds of input survives an accidental refresh/navigation (draft protection verified, not assumed)
-- [ ] The screen matches `docs/DESIGN.md` tokens — spacing, type, radii, motion — with no per-slice inventions
+- [ ] The screen matches `docs/DESIGN.md` tokens — spacing, type, color roles, radii, motion — with no per-slice inventions
 
 The workflow-level check, once per task rather than per slice: walk the *entire core task* end-to-end as a first-time user and count the steps and page hops. If the count exceeds what DESIGN.md promised, that's a plan-vs-reality conflict — handle it via Phase 14, don't quietly accept the worse workflow.
 
@@ -301,6 +374,11 @@ The workflow-level check, once per task rather than per slice: walk the *entire 
 ## Anti-Patterns (the house style to actively avoid)
 
 - **The default AI template**: centered container, hero, three feature cards, uniform card grids for everything. If the delivered UI would look at home in any other AI-generated app, design discovery was skipped — go back and do it.
+- **The default AI palette**: an indigo/blue primary, white/light-gray surfaces, a purple gradient hero — chosen because it's inoffensive, not because a distribution or harmony rule was chosen for this project. If the palette would look at home in any other AI-generated app, the Color System section was skipped.
+- **Color or type picked hex-by-hex or font-by-feel** instead of from a stated distribution ratio (60-30-10 or otherwise), a named harmony rule, and a scale ratio — the tell is that nobody could state *why* this accent, this ratio of type sizes, or this pairing, beyond "it looked nice."
+- **One line-height reused across every type size**, or a type scale with no stated ratio — sizes that were each picked by eye rather than computed from a base and a ratio.
+- **Semantic (success/warning/danger) colors reassigned to match the brand harmony** — status legibility is more important than palette consistency; don't make "danger" a brand-adjacent color because red clashes.
+- **Dark mode as a naive inversion** of the light palette instead of a re-derived role table — muddy desaturated surfaces, an accent that vibrates or loses contrast on a dark background, or a text hierarchy that lost its relative contrast steps.
 - **Component-library defaults shipped as the design.** Libraries are fine as *foundations*; unthemed defaults are a visible tell. The DESIGN.md tokens must be applied over whatever library is used.
 - **One entity, one page.** Admin UIs that mirror the schema instead of the task — the quick-add/bulk-add section exists specifically to kill this.
 - **Scroll-triggered animation on everything.** Reserve scroll animation for a few deliberate moments, if any; ambient constant motion reads as noise and costs performance exactly where it's least affordable.

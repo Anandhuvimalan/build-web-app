@@ -423,12 +423,36 @@ per-slice style inventions are source-of-truth drift (see frontend-design.md).
 - Breakpoints: <list> — and the re-flow decision at each (what the composition
   becomes, and the deliberate stack order on mobile)
 
+## Color system
+- Distribution rule: <e.g. 60-30-10 / 90-10 / 40-30-20-10 / 70-20-10> — chosen
+  because <reasoning tied to the design concept, see frontend-design.md's
+  Color System>
+- Harmony rule: <monochromatic / analogous / complementary / split-complementary
+  / triadic> — base hue(s): <values>
+- Role table (light theme): Background, Surface, Border/Divider, Text-primary,
+  Text-secondary, Text-disabled, Accent-primary, Accent-secondary (if any),
+  Semantic (success/warning/danger/info) — <values per role>
+- Role table (dark theme, if supported): <re-derived values per role, not a
+  naive inversion — see frontend-design.md>
+- Contrast pairs checked: <which pairings, against WCAG AA, and result>
+
+## Typography
+- Families: <display/heading family, body family, monospace if used> — chosen
+  because <reasoning tied to dominant reading mode / domain, see
+  frontend-design.md's Typography System>
+- Scale ratio: <e.g. minor third 1.2 / major third 1.25 / perfect fourth 1.333
+  / golden ratio 1.618> from a <px> base
+- Scale table: <display / h1 / h2 / h3 / body / caption — size, weight,
+  line-height per tier, line-height tightening at larger sizes>
+- Pairing rationale: <contrasting structure / superfamily — why these two
+  faces work together>
+- Loading strategy: <self-hosted / font-display: swap + metric-matched
+  fallback, subsetted weights>
+
 ## Tokens
 - Spacing scale: <base unit and steps, e.g. 4 / 8 / 16 / 24 / 32 / 48 / 64> —
   every container's padding/gap is one of these steps, no invented values
   (see frontend-design.md's Geometry & Spatial Composition)
-- Type scale: <display / heading / body / caption — size, weight, line-height>
-- Color roles: <background layers, surface, text hierarchy, accents — as roles>
 - Radii: <values, and where each applies>
 - Motion tokens: <named easing curves, e.g. ease-out-standard:
   cubic-bezier(0.16, 1, 0.3, 1) for entrances, ease-in-out-standard:
