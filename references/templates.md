@@ -466,6 +466,20 @@ per-slice style inventions are source-of-truth drift (see frontend-design.md).
 - Animation library: <CSS only / Framer Motion / GSAP> — per the Decision Log
   entry of <date>; lazy-loaded, never in the first-paint path
 
+## Preloader
+- Decision: <exists, and what real readiness signal it gates on (fonts, image/
+  video decode, 3D asset load) — or "none, deliberately, because load is
+  already fast">
+- Visual continuity: <shares the hero's background color/decorative
+  vocabulary, per frontend-design.md's Preloaders section>
+- Handoff: <how the preloader's exit and the intro's entrance are one timeline>
+
+## Page transitions (if this project is an SPA)
+- Pattern: <curtain wipe / shared-element FLIP morph / cross-fade / none> —
+  chosen because <reasoning tied to the design concept>
+- Cost check: <confirmed affordable at real navigation frequency, not just
+  on first click>
+
 ## First-visit intro
 - Decision: <pattern chosen (e.g. split-text headline build, masked hero
   reveal, structural frame-in) and why it fits the design concept above — or
