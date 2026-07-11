@@ -218,6 +218,19 @@ Record in `docs/DESIGN.md`: the chosen families and why (tied to the content/rea
 
 Generic-feeling UI is rarely one big mistake — it's a hundred small containers whose padding, gaps, and internal alignment were each eyeballed independently, so nothing shares a rhythm and small inconsistencies compound into a feeling of "not quite right" that's hard to point at. Treat every container's internal geometry as arithmetic, not feel — the same discipline the layout-grid math in Design Discovery applies at the page level, applied here at the level of every individual box.
 
+### The container calculation procedure — run per container, not by feel
+
+Every rule in this section and in Component Micro-Design (below) is an ingredient. This is the recipe that calls them, in order, for any container that repeats or serves as a template (a card, a button, a chip, a panel, a nav item, a modal) — a one-off decorative element doesn't need it, but anything the product will render more than once does. Work through these in order and **write the resulting numbers down** (in the component's micro-spec, in `docs/DESIGN.md`, or as a token comment) instead of nudging a value until it looks right:
+
+1. **Identify the content extremes.** What's the shortest realistic content this container will hold, and the longest — a two-word label vs. a twelve-word one, an empty state vs. a five-line description? The container has to work at both ends; sizing it to whatever's currently in the mock is designing for a placeholder, not the product.
+2. **Assign padding from the spacing scale**, choosing top/bottom independently from left/right per the optical rule below (text usually wants less top than bottom; buttons usually read better wider than tall). State which two scale steps were chosen and why — not "it looked balanced."
+3. **Assign gaps to siblings and children from the same scale**, one step, chosen once and applied everywhere this container repeats. If it nests inside another container, confirm the compounding rhythm still reads as one system (outer step, inner step) rather than two unrelated scales colliding.
+4. **Compute any icon/text/adornment relationship the container holds** — mirrored padding for a trailing icon, optical (not bounding-box) centering, cap-height alignment — using the exact formulas in Optical Alignment, below, and in Component Micro-Design. Write the pixel relationship down; don't nudge it by eye.
+5. **Check the container against the viewport it will actually render in.** Does it fit at the smallest supported breakpoint without an unintended scroll, overlap, or truncation? If it's part of a fixed-height composition (a hero, a modal), it has to pass the "sum the real content height against the target viewport" check in Fitting the Viewport, below.
+6. **Confirm it survives resize and reflow, not just its authored size.** A non-uniformly-scaled shape (an inline SVG, a `clip-path`), a fluid grid column, or a flex basis — check the container at both ends of its supported width range, not only at the width it happened to be designed at.
+
+Skipping straight to step 2 without doing step 1 first is the single most common way a container "looks fine now" and reads as **stuck** — cramped, jammed, or awkwardly clipped — the moment real content or a real viewport hits it. That failure mode is the arithmetic version of this workflow's own Definition of Ready (Book 2, Phase 8): a recurring container isn't Ready to ship until this procedure has actually been run for it, not assumed to be fine because the happy-path mock looked right.
+
 ### Every container is a calculation
 
 For any box that holds content — a card, a button, a chip, a modal, a table cell — its dimensions are a function of its content plus the spacing scale, not an arbitrary fixed value:
@@ -414,6 +427,7 @@ For any slice with a UI surface, Phase 9's end-to-end verification step expands 
 - [ ] If the project supports dark mode: verified against its own re-derived role table, not assumed to be "the same but inverted"
 - [ ] Any form worth >30 seconds of input survives an accidental refresh/navigation (draft protection verified, not assumed)
 - [ ] Viewport-anchored chrome (nav/footer) checked at a wide desktop viewport specifically — hugs the true edge with its own small margin, not stranded in the centered content well's gutter
+- [ ] Every recurring container on the screen was run through the Container Calculation Procedure — checked at its shortest and longest realistic content, not just what's in the mock — and none of it reads as stuck, cramped, or awkwardly clipped
 - [ ] The screen matches `docs/DESIGN.md` tokens — spacing, type, color roles, radii, motion, outer-margin, signature-interaction fallback — with no per-slice inventions
 
 The workflow-level check, once per task rather than per slice: walk the *entire core task* end-to-end as a first-time user and count the steps and page hops. If the count exceeds what DESIGN.md promised, that's a plan-vs-reality conflict — handle it via Phase 14, don't quietly accept the worse workflow.
@@ -450,4 +464,5 @@ The workflow-level check, once per task rather than per slice: walk the *entire 
 - **Spinner-only loading** and **animations that gate content** (users wait for the fade-in to finish before they can act).
 - **Confirmation dialogs as a safety blanket** on reversible actions, instead of undo.
 - **Per-slice style invention** — a new gray, a new gap value, a new duration "just this once." That's source-of-truth drift; the tokens live in DESIGN.md.
+- **A container sized or padded by feel** — "it looked balanced" instead of a stated spacing-scale step and a check against real content extremes (the Container Calculation Procedure, above). This is the single biggest source of the generic, slightly-stuck feeling users notice without being able to name.
 - **Designing only the happy, populated, fast-network state.** Real first impressions are empty states on slow connections.

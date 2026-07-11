@@ -98,7 +98,7 @@ Phase 9 (below) defines when a slice is *done*. A slice shouldn't start until it
 - Its Performance Checklist delta (against `docs/PERFORMANCE_BASELINE.md`) is written, even if "N/A beyond baseline"
 - The files it's expected to touch are identified
 - The agent role(s) or context (Phase 7) it needs are identified
-- If the slice has a UI surface: `docs/DESIGN.md` exists and covers this screen's layout system and tokens, and the slice's spec names its empty/loading/error/populated states (see `frontend-design.md`) — a UI slice designed only in its populated state is not Ready
+- If the slice has a UI surface: `docs/DESIGN.md` exists and covers this screen's layout system and tokens, and the slice's spec names its empty/loading/error/populated states (see `frontend-design.md`) — a UI slice designed only in its populated state is not Ready. Any recurring container it introduces (a card, a button, a chip, a panel) has been run through the Container Calculation Procedure (`frontend-design.md`'s Geometry & Spatial Composition) — padding, gaps, and icon/text relationships computed against real content extremes, not sized to whatever's in the mock.
 
 If any of these is missing, resolve it before writing code — treat "let's just start and figure it out" as a warning sign, not a time-saver.
 
