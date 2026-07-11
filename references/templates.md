@@ -410,11 +410,28 @@ per-slice style inventions are source-of-truth drift (see frontend-design.md).
   domain's own visual vocabulary, and the one visual idea a first-time viewer
   should get in three seconds. Derived from the project itself, not a style
   preference; see frontend-design.md's Design Discovery>
+- Project fact sheet: <the specific facts mined in discovery that design
+  decisions cite — name/place/products/story/tone/artifacts; see the
+  uniqueness guarantee in frontend-design.md>
+- Signature geometry motif: <the one shape derived from a project artifact,
+  and where it's carried — radii, dividers, clips, icons>
 - Chosen direction: <bento grid / editorial / dense console / minimal / reference-derived>
 - Chosen by: <who>, on <date> — from options offered in design discovery, not defaulted
 - Reference site(s), if any: <URL> — measured in a real browser on <date>, values below
 - Users of this UI: <who, how often, skill level>
 - Device/network floor: <e.g. mid-range Android on 3G — this is a design input>
+
+## Inspiration research (if live showcase browsing was run)
+- Sources visited: <URLs + date, e.g. awwwards tag pages and the live sites
+  behind them>
+- Techniques adopted: <one line each — technique, source, and the project
+  fact that justifies adopting it; no single source dominating>
+
+## Uniqueness audit (run before sign-off; see frontend-design.md)
+- Would this read at home in another AI-generated site? <no, because …>
+- The one thing a visitor would describe to a friend: <…>
+- Would a different team with this workflow land here? <no, because these
+  decisions trace to these project facts: …>
 
 ## Layout system
 - Container max-width (centered content well): <px>
