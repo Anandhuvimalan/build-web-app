@@ -417,9 +417,13 @@ per-slice style inventions are source-of-truth drift (see frontend-design.md).
 - Device/network floor: <e.g. mid-range Android on 3G — this is a design input>
 
 ## Layout system
-- Container max-width: <px>
+- Container max-width (centered content well): <px>
 - Grid: <columns> columns, <px> gutter, <px> outer margins
 - Column math: (container − (columns−1)×gutter) / columns = <px> per column
+- Outer margin (viewport-anchored chrome — nav/footer/full-bleed sections):
+  <px per breakpoint, e.g. 24px mobile / 40–64px desktop> — distinct from the
+  content well's max-width; audited at the desktop breakpoint specifically
+  (see frontend-design.md's Full-bleed chrome vs. the centered content well)
 - Breakpoints: <list> — and the re-flow decision at each (what the composition
   becomes, and the deliberate stack order on mobile)
 
@@ -474,8 +478,19 @@ per-slice style inventions are source-of-truth drift (see frontend-design.md).
 ## Component micro-specs (running list)
 - Dropdown/select: <link to the anatomy in frontend-design.md's Component
   Micro-Design, plus any project-specific deviation and why>
+- Searchable comboboxes: <which dropdowns cross the search threshold, the
+  threshold used, and why — see frontend-design.md's "When the list gets long">
 - <other recurring small component, if its spec deviates from the book's
   default anatomy — most won't need an entry here>
+
+## Signature interaction (if any)
+- Decision: <what it is, one or two sentences — or "none, deliberately,
+  because <reason>">
+- Why this project's concept earns it: <tie to the design concept above>
+- Construction approach: <pointer-driven reveal / morphing material mask /
+  other — see frontend-design.md's One signature interaction>
+- Touch fallback: <substitute interaction, or "omitted on touch, deliberately">
+- Reduced-motion fallback: <collapses to state>
 
 ## Shape vocabulary (only if this project uses cut/clipped card shapes)
 - Docking notch/blister construction: <controls it's sized for, clearance used>
