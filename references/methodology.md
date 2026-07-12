@@ -241,6 +241,16 @@ Define, and keep current, the exact order a new session should read documents in
 
 When a real design tension gets resolved mid-project — a conflict between two earlier documents, or a genuine trade-off with no single obviously-correct answer — record the resolution as a **standing decision**, not just as an artifact of the commit that resolved it. `NEXT_SESSION.md` should carry a short "standing decisions this session should not re-litigate" list. This is what prevents the same question from being re-asked (and possibly re-answered differently) three modules later.
 
+### In-session context hygiene — the anti-compaction discipline
+
+The artifacts above protect memory *between* sessions. The threat *within* a session is quieter: the working context fills as the session reads files, runs commands, and iterates — and when it overflows, automatic summarization compacts the history, blurring exactly the details (an exact error string, a half-decided trade-off, the user's phrasing of a requirement) that were about to matter. Don't wait for that; run the session so compaction never decides what survives:
+
+- **Document-and-release.** The moment a slice is verified, documented, and committed, its details live in files — the per-slice note, the Changelog, `NEXT_SESSION.md` — and the session stops carrying them. Never re-open finished work's files "to keep them in mind"; the repo *is* the mind. This is the same two-tier principle as above, applied minute-to-minute: finished work is summarized in its artifacts, not held raw in the conversation.
+- **One slice, one session, by default.** The slice loop was sized to fit comfortably inside a single session's context. Chaining a second slice onto a long session spends its remaining context on work that deserves a fresh start — end cleanly (slice done, `NEXT_SESSION.md` overwritten) and begin the next slice cold. A marathon session that ends in compaction mid-slice is strictly worse than two clean sessions.
+- **Offload bulk reading to subagents.** Research, exploratory codebase searches, long-document review, and independent verification passes are exactly what role-scoped parallel agents are for (Phase 7, `coding-standards.md`) — the subagent burns *its* context on the raw material and returns a distilled finding; the orchestrating session keeps only the conclusion. Ten files read in the main session cost what they cost forever; ten files read by an agent cost one paragraph.
+- **Read narrow, per the cold-start order.** The reading order exists to keep session start cheap — resist "loading the whole docs folder for safety." Every unnecessary document read at the start is context unavailable to the actual work at the end.
+- **Recognize the warning signs and land the plane.** A session that has read many files, iterated through several failed attempts, or accumulated long tool outputs is near its budget: stop opening new fronts, finish or cleanly park the current step (park = write the state into `NEXT_SESSION.md`: what was tried, what failed, what's next), and hand off to a fresh session. Parking well is a skill success, not a failure — the failure is pushing on until compaction garbles the handoff nobody wrote.
+
 ### What NOT to persist
 
 - Chat transcripts or a narrative of the conversation — the code and the docs above are the record.

@@ -433,6 +433,30 @@ per-slice style inventions are source-of-truth drift (see frontend-design.md).
 - Would a different team with this workflow land here? <no, because these
   decisions trace to these project facts: …>
 
+## Cinematic direction (see frontend-design.md's Cinematic Direction)
+- Storyboard: <the page arc in three lines — hook / development / resolution,
+  and each section's named job in the story>
+- Camera grammar: <dolly / held shots with cuts / dissolves — one per page>
+- Blocking notes: <where key elements enter from, and the reading path that
+  motion follows>
+- Depth layers: <what lives in background / midground / foreground; where
+  elements overlap across layers>
+- Containment rule applied: <which content is genuinely enumerable and gets
+  visible containers; everything else composed on the canvas>
+
+## 3D pipeline (only if the concept earns a 3D scene)
+- Scene and its narrative job: <what it shows and why it's a "moment">
+- Asset source: <authored in Blender (via Blender MCP if configured) from
+  <project artifact> / other — never a stock ornament>
+- Delivery: <GLB + Draco/meshopt, lazy-loaded off critical path, DPR cap,
+  offscreen pause, reduced-motion poster fallback>
+- Budgets: <bundle size and frame time, in PERFORMANCE_BASELINE.md>
+
+## Design checkpoint log (append per major surface; see frontend-design.md)
+- <surface> — shown <date>, feedback: <what the user said>, adaptation:
+  <what changed>, standing preference carried forward: <e.g. tighter spacing,
+  calmer motion — applies to all later sections without re-asking>
+
 ## Layout system
 - Container max-width (centered content well): <px>
 - Grid: <columns> columns, <px> gutter, <px> outer margins

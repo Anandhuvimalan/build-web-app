@@ -164,6 +164,53 @@ Offer these alongside bento in discovery, each in one honest line: **editorial/t
 
 ---
 
+## Cinematic Direction — the page as a directed scene, not a stack of boxes
+
+The strongest rejection this workflow makes of the AI house style is compositional: **the default AI page is a vertical stack of uniform card containers, and a card-stack is inert** — it reads as a filing cabinet, not a living thing. A directed page works the way a film does: it tells one story, its elements share a world, and the viewer is *led* through it. This section is the director's half of Book 4; everything else (geometry, color, type, motion) is the crew.
+
+### Storyboard before layout
+
+Before any section is laid out, write the page's storyboard — three lines in DESIGN.md, like a film treatment:
+
+- **Acts.** A page has an arc: the *hook* (the opening moment — the intro/hero, the one visual idea from the design concept landing in three seconds), the *development* (each section advances the story — capability, proof, depth — in a deliberate order, not "features, then testimonials, because that's the template order"), and the *resolution* (the call to action as the story's payoff, not a button bolted to the bottom). Name each section's job in the arc; a section with no narrative job gets cut, exactly like a scene that doesn't advance a film.
+- **The scroll is the camera.** Decide the page's camera grammar once: scrolling as a *dolly* (continuous movement through one connected space — elements enter, pass, and exit like scenery), as *held shots with cuts* (pinned scenes that play out, then release — GSAP `pin`), or as *dissolves* (sections cross-fading through each other). Pick one grammar per page and let every section obey it — a page that dollies, then cuts, then parallaxes at random reads as edited by committee.
+- **Blocking.** For each scene, decide where elements enter from and why — type rises from the fold line it will sit on; an image slides in from the side its content faces; nothing "fades in from nowhere, wherever it happens to sit." Entrances follow the reading path (the eye-line), so motion *leads* the viewer instead of decorating around them.
+
+### The alive canvas — composition instead of containment
+
+The rule that kills the card-stack: **an element gets a visible container only when containment means something** — a genuinely enumerable set of homogeneous items (products, plans, table rows), or an interactive surface that needs a boundary (a form, a dropdown panel). Everything else sits *in the scene*:
+
+- **Compose in depth layers** — background (color fields, oversized type, texture, a 3D scene), midground (the primary content), foreground (small floating accents, the docked controls from the shaped-card section). Elements overlap across layers — a headline's descender tucks behind an image, a product breaks out of its color field — because overlap is what makes a composition read as one world instead of adjacent rectangles.
+- **Type is scenery, not just labels.** Display type at architectural scale — cropped by the viewport edge, layered behind or in front of imagery, used as the section's structure itself (the noth.in reference earlier in this book is exactly this) — is the cheapest cinematic instrument there is: zero bytes of media, pure design.
+- **Section boundaries are transitions, not gaps.** Two adjacent sections share an edge the way two film scenes share a cut: a color field that ends on a diagonal, a shape from the vocabulary bridging both, an element that starts in one section and finishes in the next. A page whose every section is a full-width stripe separated by 96px of nothing is paginated, not directed.
+- **Whitespace is negative space in the composition** — deliberate, asymmetric, load-bearing — not the uniform padding a card template distributes evenly around everything.
+- The bento grid (above) remains legitimate *within* this: a bento is a composed arrangement — the anti-pattern is not the grid, it's the reflexive wrapping of every piece of prose, every image, and every heading in its own bordered, shadowed rounded box.
+
+### Presence of motion is the house default; its pattern is still derived
+
+This workflow's standing position, recorded here once so sessions stop re-deciding it: **every public-facing project opens with a directed intro moment and navigates through designed transitions.** The craft rules from the Motion section still govern (real-content material, once per session, skippable, reduced-motion collapse, preloader gating on real readiness) and the *pattern* is still derived from the project's facts per the uniqueness guarantee — what's no longer optional is the presence of an opening moment and a transition grammar. The documented exception path: a daily-grind internal tool may opt down to minimal motion, recorded in DESIGN.md with its reason — silence is a directing choice too, but it has to be *chosen*, not defaulted into.
+
+### 3D as a cinematic instrument — three.js, and the Blender pipeline
+
+When the design concept earns real depth — a product worth orbiting, a spatial metaphor, a hero that is the story — 3D is the instrument, and it follows the same discipline as every other dependency:
+
+- **Three.js (or react-three-fiber in React projects) is the delivery layer**; scroll-driven camera moves through a scene obey the scrubbed-moment rules from the Motion section — this is the one or two moments per page that are the point, not ambient decoration on every section.
+- **Author custom assets instead of stock.** If the developer's machine has a Blender MCP connection configured (check for a `blender` MCP server; the addon requires Blender running with its socket server active), model the asset there — a custom object derived from the project's own artifacts (the signature-motif rule extended into 3D: *this* bakery's bread, *this* product's silhouette) is what separates a cinematic scene from a floating stock torus. Keep authored geometry deliberately low-poly-elegant; style comes from materials and lighting, not polygon count.
+- **The delivery discipline is non-negotiable**: export GLB with Draco/meshopt compression; lazy-load the scene code and assets entirely outside the critical path (the page must be readable before the scene arrives — reserve its space, fade it in); cap device-pixel-ratio; pause the render loop when the scene is offscreen or the tab is hidden; `prefers-reduced-motion` and low-end devices get a rendered poster image, not a stuttering canvas. A 3D scene enters `PERFORMANCE_BASELINE.md` with its own bundle and frame-time budget, and the throttled-device verification pass applies to it doubly.
+
+### Section-by-section design checkpoints — direct with the user, not for them
+
+Cinematic ambition raises the cost of guessing wrong, so the feedback loop tightens: **each major UI surface gets its own checkpoint with the user as it's first built** — the nav, the hero/intro, each subsequent scene. The loop:
+
+1. Build the section to a genuinely reviewable state (real content, real motion — not a gray-box sketch that forces the user to imagine the design).
+2. Show it — screenshot at the key viewport, or the running app — and ask two focused questions: *is this direction right?* and *what would you change?* Not "do you like it?", which invites a mood, not a decision.
+3. Adapt to the answer, and **carry the feedback forward as a standing decision**: if the user pulled the nav toward tighter spacing or calmer motion, that preference applies to every subsequent section without being re-asked — record it in the DESIGN.md checkpoint log, exactly like Phase 12's standing decisions.
+4. An approved section is a settled scene: later work matches it, and revisiting it needs the same explicit sign-off as any source-of-truth change.
+
+This replaces the failure mode of building the whole page and asking once at the end — by which point the accumulated guesses are too expensive to unwind. A UI slice covering a major surface is not **Done** (Phase 9) until its checkpoint has run.
+
+---
+
 ## Color System
 
 The AI-default palette is recognizable on sight: a blue or indigo primary, a white/light-gray surface, and a purple gradient hero — chosen because it's inoffensive, not because anything about the project asked for it. A color system prevents that the same way the layout system does: **a distribution rule and a harmony rule are chosen deliberately, from the design concept, and stated as a ratio and a role table** — not picked hex-by-hex until it "looks nice."
@@ -376,7 +423,7 @@ Record the decision in `docs/DESIGN.md`: whether a preloader exists and what rea
 
 ### The first-visit intro (extends Phase 1's Design Discovery)
 
-An intro sequence — a brief, deliberate animated moment before or as the main UI settles, picking up once any preloader gate above has lifted — is a legitimate design decision for a project whose three-second idea (from the design-concept question in Design Discovery) benefits from one, and a mistake when bolted onto every project by reflex. Decide it explicitly, in discovery, per project:
+An intro sequence — a brief, deliberate animated moment before or as the main UI settles, picking up once any preloader gate above has lifted — is, per this workflow's house default (Cinematic Direction, above), *present* on every public-facing project; what remains a per-project decision is its **pattern**, derived from the design concept, never pulled from a generic effects library. The craft rules:
 
 - **The pattern is derived from the design concept and the dominant content shape, not chosen from a generic "website intro" effects library.** A data-dense internal tool used fifty times a day should almost never get a decorative intro — the cost is paid by the same user every single time, and speed *is* the design statement for that product. A portfolio, a landing page, or a brand-forward consumer product visited occasionally can afford a few hundred milliseconds of a considered opening, because the cost is paid once and the payoff is the first impression. Decide which situation this project is before adding one.
 - **The intro composes the same content the page needs anyway — it doesn't hide behind an unrelated splash.** A mask/clip-path reveal of the actual hero content, a headline that builds itself (a split-text reveal, one word or line at a time), or a structural build (frame lines draw in, then real content populates them) all use real content as the animation's material. A generic logo spinner or unrelated loading animation the user sits through before the real page appears is dead time, not design — exactly the "bolted-on" feeling to avoid.
@@ -450,6 +497,8 @@ For any slice with a UI surface, Phase 9's end-to-end verification step expands 
 - [ ] Any form worth >30 seconds of input survives an accidental refresh/navigation (draft protection verified, not assumed)
 - [ ] Viewport-anchored chrome (nav/footer) checked at a wide desktop viewport specifically — hugs the true edge with its own small margin, not stranded in the centered content well's gutter
 - [ ] Every recurring container on the screen was run through the Container Calculation Procedure — checked at its shortest and longest realistic content, not just what's in the mock — and none of it reads as stuck, cramped, or awkwardly clipped
+- [ ] For a major UI surface: its **design checkpoint ran** — the user saw the built section and the feedback was applied or recorded (Cinematic Direction, above); the slice is not Done on a surface the user never saw
+- [ ] If the slice ships a 3D scene: GLB compressed (Draco/meshopt), loaded off the critical path with reserved space, DPR capped, render loop pauses offscreen/hidden-tab, reduced-motion/low-end fallback poster verified, and its frame-time/bundle budget in `PERFORMANCE_BASELINE.md` measured, not assumed
 - [ ] The screen matches `docs/DESIGN.md` tokens — spacing, type, color roles, radii, motion, outer-margin, signature-interaction fallback — with no per-slice inventions
 
 The workflow-level check, once per task rather than per slice: walk the *entire core task* end-to-end as a first-time user and count the steps and page hops. If the count exceeds what DESIGN.md promised, that's a plan-vs-reality conflict — handle it via Phase 14, don't quietly accept the worse workflow.
@@ -459,6 +508,9 @@ The workflow-level check, once per task rather than per slice: walk the *entire 
 ## Anti-Patterns (the house style to actively avoid)
 
 - **The default AI template**: centered container, hero, three feature cards, uniform card grids for everything. If the delivered UI would look at home in any other AI-generated app, design discovery was skipped — go back and do it.
+- **The card-stack page**: every section, paragraph, and image wrapped in its own bordered, shadowed, rounded container, stacked vertically with uniform gaps. Containment without meaning is the single strongest "AI-built" tell — content belongs *in the scene* (Cinematic Direction, above); visible containers are reserved for enumerable homogeneous items and bounded interactive surfaces.
+- **A page with no narrative arc** — sections in template order (hero, features, testimonials, CTA) with no stated job in the story, no camera grammar, and entrances from nowhere. Directed pages are storyboarded first.
+- **3D as a stock ornament** — a floating generic shape with no relationship to the project's artifacts, shipped uncompressed on the critical path, rendering at full DPR while offscreen.
 - **The default AI palette**: an indigo/blue primary, white/light-gray surfaces, a purple gradient hero — chosen because it's inoffensive, not because a distribution or harmony rule was chosen for this project. If the palette would look at home in any other AI-generated app, the Color System section was skipped.
 - **Color or type picked hex-by-hex or font-by-feel** instead of from a stated distribution ratio (60-30-10 or otherwise), a named harmony rule, and a scale ratio — the tell is that nobody could state *why* this accent, this ratio of type sizes, or this pairing, beyond "it looked nice."
 - **One line-height reused across every type size**, or a type scale with no stated ratio — sizes that were each picked by eye rather than computed from a base and a ratio.
