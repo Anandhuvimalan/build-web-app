@@ -200,7 +200,8 @@ Three rules that matter *especially* for AI-written tests:
 
 Immediately after a slice passes verification — not batched, not postponed:
 
-- **A per-slice note** — even a short one — capturing what was built, what was disclosed as a necessary addition, what bugs were caught during self-review, and what the next slice needs to know.
+- **A per-slice note** — even a short one — capturing what was built, what was disclosed as a necessary addition, what bugs were caught during self-review, and what the next slice needs to know. Written in the working-doc register (`methodology.md` Phase 12): compressed wording, full substance.
+- **The Project Map** (`docs/PROJECT_MAP.md`) — update exactly the entries this slice touched: new files added, responsibilities/exports/dependency edges changed, tagged `[E]` since the files were just open. Never regenerate the whole map, and never skip the update — a changed file with a stale entry has silently degraded that entry to a guess (`methodology.md` Phase 12).
 - **The Roadmap's progress log** — mark the slice done, in one line, with a pointer to its note.
 - **The Changelog** — one entry, written for a human skimming history, not for the AI itself.
 - **The "what's next" file** — overwritten (not appended) to point at the next slice, including any gaps or conflicts already discovered in that slice's own spec (see Phase 12, `methodology.md`).
@@ -210,6 +211,7 @@ Immediately after a slice passes verification — not batched, not postponed:
   - **Dead-code sweep**: unused exports, unreachable branches, orphaned files, commented-out code, and leftover experiments deleted — run the project's dead-code/unused-dependency tooling (configured at bootstrap), don't hunt by eye alone.
   - **Naming conformance**: every name this module introduced checked against `docs/REPOSITORY_STANDARDS.md` and the domain's real vocabulary — renames are cheap now, expensive after three more modules build on top.
   - **TODO reconciliation**: every TODO/FIXME the module left behind either becomes a slice, a Risk Register entry, or gets deleted — none survive as vague debt.
+  - **Register migration**: any verbose session-mechanics docs this module accumulated (slice notes, map entries, standing-decision lines written in full prose) rewritten into the working-doc register (`methodology.md` Phase 12) — compression at the hygiene pass, not as its own big-bang session; human-facing decision docs are exempt by design.
   - Verification (Phase 9's lint/type/test gates) runs again after the pass — hygiene that breaks the build isn't hygiene.
 - **An ADR** — only if the slice made a real architectural decision (a new library, a new external dependency, a caching strategy, a schema-shape trade-off). Most slices won't need one.
 - **A Decision Log entry** (`docs/DECISIONS.md`) — for the smaller decisions that don't rise to ADR weight but would still get silently re-litigated later if unrecorded: a naming choice with a real reason behind it, picking one library API over another already-approved one, a small trade-off made for now. One or two lines, dated, with the reason. This is what stops the same small argument from happening again in a later session — cheaper than an ADR, more durable than a comment.
@@ -246,6 +248,7 @@ Concretely:
 - **Distrust your own first implementation of anything security- or correctness-sensitive** enough to write a test that would catch you being wrong — a deliberately-introduced violation that should fail, then confirm it does, then remove it. This applies to authorization boundaries, uniqueness constraints, drift-detection tests, and anything else whose entire value is "this fails loudly when someone breaks it."
 - **When a test fails, suspect the implementation first, the test's assumption second, and "the framework must be broken" last, in that order.**
 - **Treat real end-to-end runs as an oracle above unit tests for framework-integration questions** — a mocked test can be wrong about how the real framework behaves; running the real thing cannot.
+- **The Project Map's confidence tags are this same discipline applied to navigation** (`methodology.md` Phase 12): `[E]` — the entry was written with the file open — supports acting without reopening the file; `[I]` — inferred — is a hypothesis that gets verified against the actual file, then upgraded, before anything is built on it.
 
 ---
 

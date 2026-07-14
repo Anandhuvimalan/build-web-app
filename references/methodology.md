@@ -213,6 +213,7 @@ This is the phase that makes a project survivable across dozens of separate AI s
 | `docs/features/<slice-id>.md` | A lightweight note on exactly what one slice did | Once per slice |
 | `docs/features/<module-name>.md` | The full, consolidated story of a module | Once per module, at its last slice |
 | `NEXT_SESSION.md` | The single file a cold session reads to know what to do right now | Overwritten (not appended) every slice |
+| `docs/PROJECT_MAP.md` | A compact, confidence-tagged index of the codebase — file → responsibility → key exports → depends-on edges — queried instead of re-reading or grepping the repo | Incrementally: only the entries a slice touched (see Phase 10) |
 | `docs/adr/*.md` | Immutable records of real architectural decisions | Only when a real decision is made; never edited, only superseded |
 | `docs/DECISIONS.md` | A running, lightweight log of small decisions too minor for an ADR | Appended whenever a small "we chose X because Y" decision is made |
 | `docs/RISKS.md` | Open technical/business uncertainties not yet resolved | Only when a meaningful risk surfaces; entries closed out (not deleted) once resolved |
@@ -233,9 +234,38 @@ Writing a full Feature Summary after *every single slice* creates too much docum
 - **Per-slice note** (`docs/features/<slice-id>.md`): three paragraphs, tops. What this slice did, any bug it caught, what the next slice needs to know. Written every time.
 - **Per-module Feature Summary** (`docs/features/<module-name>.md`): the full picture — files touched by layer, database changes, APIs added, business rules implemented, testing completed, security/performance notes, known issues, what depends on this module now. Written once, when the module's last slice lands, consolidating its per-slice notes into one document a completely new session can read instead of replaying the whole module's history.
 
+### The Project Map — query an index instead of re-reading the code
+
+The single biggest avoidable token cost across a long project is **re-derivation**: every session grepping and opening files to rediscover what an earlier session already knew — where X lives, what touches Y, what breaks if Z changes. `docs/PROJECT_MAP.md` (template in `templates.md`) turns that from a per-session scan into a lookup:
+
+- **One line per source file, grouped by module**: path — responsibility — key exports — depends-on edges. Written in the working-doc register (below), because this file is read more often than any other.
+- **A load-bearing list at the top**: the handful of files and concepts the most things flow through — what a session must know before touching anything near them. This is deliberately the graph-theoretic "most-connected nodes" idea: the map names them explicitly so no session discovers them by breaking one.
+- **Every entry carries a confidence tag** — `[E]` *extracted*: written or last updated by a session that had the file open; `[I]` *inferred*: believed but not verified against the file. These are the same two confidence levels as Phase 13's anti-hallucination rule ("I read it" vs. "it's plausible"), applied to navigation: an `[E]` entry supports acting without reopening the file; an `[I]` entry is a hypothesis — verify it before building on it, then upgrade the tag. A session that changes a file without updating its entry has silently degraded that entry to `[I]`, which is exactly why the update happens in the same commit (Phase 10).
+- **Updates are incremental, never regenerative.** Phase 10 rewrites exactly the entries the slice touched — new files added, responsibilities or dependency edges changed — and nothing else. Regenerating the whole map every slice would cost more than the map saves; an untouched entry is never rewritten.
+- **The map is an index, never a source of truth.** If the map and the code disagree, the code wins and the map is fixed in the same commit. The map records what *is*, the planning docs record what's *decided* — it never overrides either.
+- **Query first, scan on miss, backfill always.** When a session needs to know where something lives or what depends on it, the map answers first. A repo-wide grep or exploratory read happens only when the map has no answer — and whatever that scan discovers is written back as new `[E]` entries in the same session, so no future session pays for the same discovery. The first derivation costs tokens once; the map is what stops it from costing tokens forever.
+- **A real code-index tool replaces the hand-maintained entries when available.** If the environment has an AST-based code-graph or index tool (a knowledge-graph mapper, an LSP-backed symbol index, or equivalent), run it at bootstrap, query it instead of maintaining per-file lines by hand, and refresh it incrementally — keeping only the load-bearing list and non-derivable annotations in `PROJECT_MAP.md`. The hand-maintained map is the tool-free fallback, not the preferred implementation.
+
+### The working-doc register — compressed for the reader that pays per token
+
+Project documents split into two audiences, and only one of them reads for pleasure. **Human-facing decision documents** — the PRD, the Architecture document, ADRs, the README, anything a stakeholder reads or signs off — stay full, well-written prose; their nuance is their content. **Session-mechanics documents** — `NEXT_SESSION.md`, per-slice notes, `PROJECT_MAP.md`, Progress Log lines, Decision Log entries — are read by an AI session at nearly every cold start, and every redundant word in them is a tax collected on every future session. Write those in a compressed register:
+
+- **Drop** articles, filler (*just/really/basically*), pleasantries, hedging, and connective fluff. Fragments are fine. Short synonyms (*fix*, not *implement a solution for*). State each fact once.
+- **Preserve verbatim, always**: identifiers, code and inline code, file paths, commands, URLs, version numbers, quantities, and exact error strings. Never invent abbreviations (*cfg/impl/fn*) — tokenizers split them like the full word, so they save nothing and cost decoding; the full word is cheaper *and* clearer.
+- **Structure survives compression**: headings, list nesting, and tables stay — they're what makes a compressed doc scannable rather than dense.
+- **Compression removes wording, never substance.** Every fact, decision, number, and *why* survives — a fact dropped to save tokens is context loss, the exact failure this entire workflow exists to prevent. The acceptance test: the compressed note answers every question the verbose note answered.
+- **The clarity override, non-negotiable**: full sentences remain mandatory wherever compression risks a misread — ordered procedures (a migration sequence read as fragments is a production incident), security notes, instructions for irreversible actions, and any recorded rationale whose nuance is the point. When in doubt, clarity wins; the register is an efficiency tool, not a style goal.
+
+Before/after, one line of a real `NEXT_SESSION.md`:
+
+> *Verbose:* "The next session should make sure to run the database migrations before starting the dev server, because the previous slice added a new `invoices` table that the dashboard code now expects to exist."
+> *Register:* "Run migrations before dev server — slice 4.2 added `invoices` table, dashboard expects it."
+
+Same facts, same why, same identifiers — half the tokens. Existing verbose working docs get rewritten into the register during the module-close hygiene pass (Phase 10, `coding-standards.md`), not in a special big-bang session.
+
 ### The cold-start reading order
 
-Define, and keep current, the exact order a new session should read documents in — and keep it *narrow*. A session picking up one slice of one module should not need to load every other module's Feature Summary. Typically: the PRD section relevant to this module → the architecture sections this slice touches → the module's entry in the Module Breakdown → the specific slice's entry in Development Slices → that module's prior Feature Summary (if any) → the specific per-slice notes for directly preceding slices → the specific role documents this slice needs (Phase 7, `coding-standards.md`).
+Define, and keep current, the exact order a new session should read documents in — and keep it *narrow*. A session picking up one slice of one module should not need to load every other module's Feature Summary. Typically: the PRD section relevant to this module → the architecture sections this slice touches → the module's entry in the Module Breakdown → the specific slice's entry in Development Slices → a **Project Map query** for the code this slice touches (open only the files the map names; scan the repo only on a map miss, and backfill the miss) → that module's prior Feature Summary (if any) → the specific per-slice notes for directly preceding slices → the specific role documents this slice needs (Phase 7, `coding-standards.md`).
 
 ### Standing decisions
 
@@ -254,7 +284,7 @@ The artifacts above protect memory *between* sessions. The threat *within* a ses
 ### What NOT to persist
 
 - Chat transcripts or a narrative of the conversation — the code and the docs above are the record.
-- Anything already derivable by reading the code (don't document "the button is blue," the component says so).
+- Anything already derivable by reading the code (don't document "the button is blue," the component says so). The Project Map is the deliberate, bounded exception: it persists exactly the derivable facts whose *re-derivation* is the recurring cost — where things live, what exports what, what depends on what — as a one-line index, not as prose. The ban still holds for narrating code's contents.
 - Speculative future scope not yet approved — that belongs in the Roadmap as a future slice, not as a note.
 
 ---

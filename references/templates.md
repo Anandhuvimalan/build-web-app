@@ -8,7 +8,7 @@ This is the book to load when actually creating one of these files for the first
 
 ## `NEXT_SESSION.md`
 
-Referenced in `methodology.md` Phase 12 (Context & Memory Management).
+Referenced in `methodology.md` Phase 12 (Context & Memory Management). Written in the working-doc register (Phase 12): compressed wording, every fact/path/why kept.
 
 ```markdown
 # Next Session — Start Here
@@ -38,7 +38,7 @@ ROADMAP.md's Progress Log.
 
 ## Per-slice note (`docs/features/<slice-id>.md`)
 
-Referenced in `methodology.md` Phase 12's two-tier documentation pattern.
+Referenced in `methodology.md` Phase 12's two-tier documentation pattern. Written in the working-doc register (Phase 12).
 
 ```markdown
 # <Slice ID>: <Title>
@@ -85,6 +85,30 @@ Referenced in `methodology.md` Phase 12's two-tier documentation pattern.
 ## Performance Notes
 ## Known Issues
 ## Next Dependencies
+```
+
+---
+
+## Project Map (`docs/PROJECT_MAP.md`)
+
+Referenced in `methodology.md` Phase 12 (The Project Map) and updated incrementally in `coding-standards.md` Phase 10. Written in the working-doc register — this file is read more often than any other, so terseness matters most here. `[E]` = entry written/updated with the file open; `[I]` = inferred, verify before relying on it. The example entries below show the register in action:
+
+```markdown
+# Project Map
+
+Index only — code wins on conflict. Update touched entries per slice (Phase 10),
+never regenerate whole map. Repo scan only on map miss; backfill what scan finds.
+
+## Load-bearing (know these before touching anything near them)
+- `src/lib/db.ts` — DB client + transaction helper. All data access flows through it. [E]
+- `src/lib/api/envelope.ts` — response envelope + error codes. Every route wraps through it. [E]
+
+## Module: auth
+- `src/modules/auth/session.ts` — session create/verify/refresh. Exports `createSession`, `requireUser`. Depends: `db.ts`, `crypto.ts`. [E]
+- `src/modules/auth/middleware.ts` — route guard, wraps `requireUser`. Used by every authed route. [E]
+
+## Module: billing
+- `src/modules/billing/invoice.ts` — invoice CRUD + totals calc. Depends: `db.ts`, `money.ts`. [I]
 ```
 
 ---
